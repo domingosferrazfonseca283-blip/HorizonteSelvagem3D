@@ -7,6 +7,8 @@ var cam_target = Vector3(0, 1, 0)
 var player: CharacterBody3D
 var anim_player: AnimationPlayer
 var companion: CharacterBody3D
+var companion_scale = 0.5  # começa pequeno (cria)
+var companion_growth_target = 0.5
 var move_dir = Vector2.ZERO
 var speed = 4.0
 var joy_origin = Vector2(115, 0)
@@ -69,44 +71,85 @@ func _ready():
 	if anim_player:
 		anim_player.play("mixamo_com")
 
-	# Animal companheiro (placeholder: cápsula + "martelo" caixa)
+	# Companheiro: lobo real com martelo
 	companion = CharacterBody3D.new()
-	companion.position = Vector3(2, 0, 2)
-	var comp_mesh = MeshInstance3D.new()
-	var comp_shape_mesh = CapsuleMesh.new()
-	comp_shape_mesh.radius = 0.35
-	comp_shape_mesh.height = 0.9
-	comp_mesh.mesh = comp_shape_mesh
-	comp_mesh.position = Vector3(0, 0.45, 0)
-	var comp_mat = StandardMaterial3D.new()
-	comp_mat.albedo_color = Color(0.4, 0.3, 0.2)
-	comp_mesh.material_override = comp_mat
-	companion.add_child(comp_mesh)
+	companion.position = Vector3(2.5, 0, 2.5)
+	companion.scale = Vector3.ONE * companion_scale
 
+	var wolf_scene = load("res://assets/animals/wolf.glb")
+	var wolf_visual = wolf_scene.instantiate()
+	companion.add_child(wolf_visual)
+
+	var wolf_anim = find_animation_player(wolf_visual)
+	if wolf_anim:
+		var anims = wolf_anim.get_animation_list()
+		if anims.size() > 0:
+			wolf_anim.play(anims[0])
+
+	# Martelo simples nas costas do lobo (placeholder até termos um modelo dedicado)
 	var hammer = MeshInstance3D.new()
-	var hammer_mesh = BoxMesh.new()
-	hammer_mesh.size = Vector3(0.15, 0.4, 0.15)
-	hammer.mesh = hammer_mesh
-	hammer.position = Vector3(0.4, 0.6, 0)
+	var handle = BoxMesh.new()
+	handle.size = Vector3(0.06, 0.5, 0.06)
+	hammer.mesh = handle
+	hammer.position = Vector3(0, 1.0, -0.1)
+	hammer.rotation_degrees = Vector3(20, 0, 0)
 	var hammer_mat = StandardMaterial3D.new()
-	hammer_mat.albedo_color = Color(0.5, 0.5, 0.55)
+	hammer_mat.albedo_color = Color(0.4, 0.25, 0.15)
 	hammer.material_override = hammer_mat
+	var head = MeshInstance3D.new()
+	var head_mesh = BoxMesh.new()
+	head_mesh.size = Vector3(0.2, 0.15, 0.15)
+	head.mesh = head_mesh
+	head.position = Vector3(0, 0.28, 0)
+	var head_mat = StandardMaterial3D.new()
+	head_mat.albedo_color = Color(0.5, 0.5, 0.55)
+	head.material_override = head_mat
+	hammer.add_child(head)
 	companion.add_child(hammer)
 
 	var comp_col = CollisionShape3D.new()
 	var comp_cap = CapsuleShape3D.new()
-	comp_cap.radius = 0.35
-	comp_cap.height = 0.9
+	comp_cap.radius = 0.4
+	comp_cap.height = 1.0
 	comp_col.shape = comp_cap
-	comp_col.position = Vector3(0, 0.45, 0)
+	comp_col.position = Vector3(0, 0.5, 0)
 	companion.add_child(comp_col)
 	add_child(companion)
+
+	# Árvores e vegetação espalhadas pelo mapa
+	spawn_nature()
 
 	# Câmara livre
 	var cam = Camera3D.new()
 	cam.name = "FreeCamera"
 	add_child(cam)
 	update_camera(cam)
+
+func spawn_nature():
+	var tree_paths = [
+		"res://assets/nature/tree1.glb",
+		"res://assets/nature/pine1.glb",
+		"res://assets/nature/bush1.glb",
+		"res://assets/nature/rock1.glb"
+	]
+	var rng = RandomNumberGenerator.new()
+	rng.seed = 42
+	for i in range(40):
+		var path = tree_paths[rng.randi_range(0, tree_paths.size() - 1)]
+		var scene = load(path)
+		var instance = scene.instantiate()
+		var x = rng.randf_range(-40, 40)
+		var z = rng.randf_range(-40, 40)
+		# Evitar spawnar muito perto do início do jogador
+		if Vector2(x, z).length() < 6:
+			continue
+		instance.position = Vector3(x, 0, z)
+		instance.scale = Vector3.ONE * rng.randf_range(0.8, 1.4)
+		instance.rotation.y = rng.randf_range(0, TAU)
+		add_child(instance)
+
+func grow_companion(amount: float):
+	companion_growth_target = clamp(companion_growth_target + amount, 0.5, 2.5)
 
 func find_animation_player(node: Node) -> AnimationPlayer:
 	if node is AnimationPlayer:
@@ -139,12 +182,13 @@ func _physics_process(delta):
 		player.velocity = Vector3(0, -1.0, 0)
 	player.move_and_slide()
 
-	# Companheiro segue o jogador a uma certa distância
+	# Companheiro segue o jogador
 	if companion:
+		companion.scale = companion.scale.lerp(Vector3.ONE * companion_growth_target, delta * 2.0)
 		var to_player = player.position - companion.position
 		to_player.y = 0
 		var dist = to_player.length()
-		if dist > 2.0:
+		if dist > 2.5:
 			var dir = to_player.normalized()
 			companion.velocity = dir * (speed * 0.9)
 			companion.velocity.y = -1.0
