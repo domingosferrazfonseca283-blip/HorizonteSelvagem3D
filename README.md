@@ -15,9 +15,14 @@ A direção busca **aventura anime cinematográfica + exploração 3D madura**, 
 - Encontros com três ações: Pulso, Guardar e Vínculo.
 - Fauna com vida, movimento e estados.
 - HUD responsivo.
-- Sem etapa de build local: o protótipo roda no navegador moderno.
+- Protótipo Android nativo em `android/`, com build automático via GitHub Actions.
+- Cada build do Android no branch `master` também é publicada como GitHub Release pública com o APK.
 
-## Executar
+## Executar Android
+
+O APK de teste é gerado automaticamente pelo workflow **Android APK**. As releases públicas ficam na página de Releases do repositório.
+
+## Executar Web
 
 Abra `index.html` em um servidor estático. Para desenvolvimento local:
 
