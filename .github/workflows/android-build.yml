@@ -5,6 +5,9 @@ on:
     branches: [ master ]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -25,9 +28,20 @@ jobs:
           gradle-version: '8.10'
       - name: Build debug APK
         run: gradle :app:assembleDebug
-      - name: Upload APK
+      - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: HorizonteSelvagem3D-debug
           path: android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
+      - name: Publish public GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v0.1.0-build.${{ github.run_number }}
+          name: Horizonte Selvagem 3D v0.1.0-build.${{ github.run_number }}
+          body: |
+            APK de teste do Horizonte Selvagem 3D.
+
+            Esta versão é gerada automaticamente a partir do branch master.
+          files: android/app/build/outputs/apk/debug/app-debug.apk
+          generate_release_notes: false
