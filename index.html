@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>Horizonte Selvagem — 3D</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="loading"><div class="loader"></div><p>Construindo o horizonte…</p></div>
+  <div id="game"></div>
+  <div id="hud">
+    <div class="brand"><b>HORIZONTE SELVAGEM</b><span>PROTOCOLO 01</span></div>
+    <div class="stats"><span>XP <b id="xp">0</b></span><span>NV <b id="level">1</b></span><span>ENERGIA <b id="energy">100</b></span></div>
+    <div class="mission"><small>MISSÃO ATUAL</small><strong id="mission">Explore o vale e encontre uma criatura.</strong></div>
+  </div>
+  <div id="crosshair">+</div>
+  <div id="combat" class="panel hidden">
+    <div><small>ENCONTRO</small><h2 id="enemyName">Fera do Vale</h2><div class="bar"><i id="enemyHp"></i></div></div>
+    <div class="actions"><button data-action="pulse">PULSO</button><button data-action="guard">GUARDAR</button><button data-action="capture">VÍNCULO</button></div>
+  </div>
+  <div id="dialog" class="panel hidden"><p id="dialogText"></p><button id="dialogBtn">CONTINUAR</button></div>
+  <div id="help">WASD mover · SHIFT correr · mouse olhar · E interagir · ESPAÇO pular · F combate</div>
+  <script type="module" src="game.js"></script>
+</body>
+</html>
