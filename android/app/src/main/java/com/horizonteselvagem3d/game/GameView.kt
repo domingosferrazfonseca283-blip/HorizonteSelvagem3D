@@ -12,6 +12,7 @@ class GameView(context: Context) : GLSurfaceView(context) {
             renderer.lookX = (e.x / width.toFloat() - .5f) * 2f
             renderer.lookY = (e.y / height.toFloat() - .5f) * 2f
         }
+        if (e.action == MotionEvent.ACTION_UP && e.x > width * .78f && e.y < height * .28f) renderer.evolve()
         return true
     }
 }
