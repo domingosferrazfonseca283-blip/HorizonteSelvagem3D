@@ -18,11 +18,46 @@ class GameRenderer : GLSurfaceView.Renderer {
     private var form=0; private var t=0f
     override fun onSurfaceCreated(gl:GL10?, c:EGLConfig?){ GLES20.glClearColor(.03f,.05f,.08f,1f); GLES20.glEnable(GLES20.GL_DEPTH_TEST); fx=FloatProgram(); cube=Mesh.cube(); ball=Mesh.ball() }
     override fun onSurfaceChanged(gl:GL10?,w:Int,h:Int){ GLES20.glViewport(0,0,w,h); Matrix.perspectiveM(p,0,58f,w.toFloat()/h.coerceAtLeast(1),.1f,60f) }
-    override fun onDrawFrame(gl:GL10?){ t+=.016f; GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT or GLES20.GL_DEPTH_BUFFER_BIT); Matrix.setLookAtM(v,0,lookX*2f,2.8f+lookY,8f,0f,1.1f,0f,0f,1f,0f); Matrix.multiplyMM(vp,0,p,0,v,0); world(); hero(); puppy() }
+    override fun onDrawFrame(gl:GL10?){ t+=.016f; GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT or GLES20.GL_DEPTH_BUFFER_BIT); Matrix.setLookAtM(v,0,lookX*2f,2.8f+lookY,8f,0f,1.1f,0f,0f,1f,0f); Matrix.multiplyMM(vp,0,p,0,v,0); world(); hero(); mystica() }
     fun evolve(){ form=(form+1)%3 }
     private fun world(){ box(0f,-.15f,0f,9f,.15f,9f,.08f,.24f,.12f); box(0f,.01f,2f,2.8f,.04f,6f,.32f,.26f,.18f); for(i in -3..3) box(i*1.8f,.35f,-3.5f,.35f,.7f,.35f,.15f,.34f,.18f) }
     private fun hero(){ box(0f,1.25f,.4f,.65f,1.35f,.4f,.14f,.35f,.72f); ball(0f,2.35f,.4f,.4f,.48f,.4f,.48f,.32f,.22f); box(-.5f,1.15f,.4f,.18f,1.1f,.18f,.12f,.25f,.55f); box(.5f,1.15f,.4f,.18f,1.1f,.18f,.12f,.25f,.55f); box(-.23f,.1f,.4f,.22f,.65f,.22f,.07f,.12f,.22f); box(.23f,.1f,.4f,.22f,.65f,.22f,.07f,.12f,.22f) }
-    private fun puppy(){ val s=if(form==0)1f else if(form==1)1.3f else 1.65f; val x=1.55f; val b=sin(t*3f)*.04f; ball(x,.65f+b,.25f,.55f*s,.42f*s,.65f*s,.52f,.30f,.10f); ball(x,1.28f*s+b,.25f,.43f*s,.42f*s,.43f*s,.62f,.40f,.18f); box(x-.32f*s,1.62f*s+b,.25f,.14f*s,.32f*s,.18f*s,.45f,.25f,.08f); box(x+.32f*s,1.62f*s+b,.25f,.14f*s,.32f*s,.18f*s,.45f,.25f,.08f); box(x-.32f*s,.25f,.25f,.18f*s,.48f*s,.18f*s,.40f,.22f,.07f); box(x+.32f*s,.25f,.25f,.18f*s,.48f*s,.18f*s,.40f,.22f,.07f); ball(x-.15f*s,1.35f*s+b,.66f,.055f*s,.055f*s,.035f*s,.02f,.02f,.02f); ball(x+.15f*s,1.35f*s+b,.66f,.055f*s,.055f*s,.035f*s,.02f,.02f,.02f); val hx=x+.62f*s; box(hx,.68f+b,.35f,.07f*s,.62f*s,.07f*s,.28f,.14f,.06f); box(hx,1.02f*s+b,.35f,.32f*s,.20f*s,.20f*s,.30f,.30f,.30f); if(form>0) box(x,1.82f*s+b,.25f,.07f,.45f*s,.07f,.86f,.50f,.08f) }
+
+    // Mística: criatura fantástica original, sem anatomia canina. Evolui em três estágios.
+    private fun mystica(){
+        val s=if(form==0)1f else if(form==1)1.3f else 1.65f
+        val x=1.55f; val bob=sin(t*3f)*.06f
+        // Corpo mágico e núcleo luminoso
+        ball(x,.72f*s+bob,.25f,.58f*s,.48f*s,.62f*s,.18f,.28f,.62f)
+        ball(x,1.32f*s+bob,.25f,.46f*s,.43f*s,.46f*s,.28f,.42f,.78f)
+        ball(x,1.28f*s+bob,.67f,.12f*s,.12f*s,.08f*s,.75f,.90f,1f)
+        // Cristais/cornos assimétricos
+        box(x-.30f*s,1.72f*s+bob,.25f,.13f*s,.38f*s,.13f*s,.45f,.18f,.80f)
+        box(x+.28f*s,1.78f*s+bob,.25f,.10f*s,.48f*s,.12f*s,.18f,.75f,.95f)
+        // Quatro membros curtos e mágicos
+        box(x-.38f*s,.25f,.22f,.16f*s,.48f*s,.16f*s,.12f,.20f,.48f)
+        box(x+.38f*s,.25f,.22f,.16f*s,.48f*s,.16f*s,.12f,.20f,.48f)
+        box(x-.36f*s,1.00f*s+bob,.55f,.15f*s,.16f*s,.22f*s,.16f,.32f,.72f)
+        box(x+.36f*s,1.00f*s+bob,.55f,.15f*s,.16f*s,.22f*s,.16f,.32f,.72f)
+        // Olhos brilhantes
+        ball(x-.15f*s,1.38f*s+bob,.66f,.055f*s,.055f*s,.035f*s,.98f,.98f,.78f)
+        ball(x+.15f*s,1.38f*s+bob,.66f,.055f*s,.055f*s,.035f*s,.98f,.98f,.78f)
+        // Cauda astral feita de fragmentos flutuantes
+        box(x+.62f*s,.85f*s+bob,.15f,.10f*s,.28f*s,.10f*s,.32f,.65f,.95f)
+        box(x+.82f*s,1.05f*s+bob,.10f,.09f*s,.24f*s,.09f*s,.45f,.30f,.95f)
+        box(x+1.00f*s,1.25f*s+bob,.05f,.08f*s,.20f*s,.08f*s,.72f,.30f,.92f)
+        // Martelo de Mística
+        val hx=x-.70f*s
+        box(hx,.85f*s+bob,.55f,.07f*s,.68f*s,.07f*s,.30f,.16f,.08f)
+        box(hx,1.22f*s+bob,.55f,.34f*s,.20f*s,.20f*s,.42f,.45f,.55f)
+        // Crescimento visual por evolução
+        if(form>0){ box(x-.62f*s,1.40f*s+bob,.25f,.08f*s,.32f*s,.08f*s,.72f,.30f,.95f); box(x+.62f*s,1.40f*s+bob,.25f,.08f*s,.32f*s,.08f*s,.72f,.30f,.95f) }
+        if(form==2){
+            box(x,2.05f*s+bob,.25f,.10f*s,.55f*s,.10f*s,.82f,.48f,.95f)
+            box(x-.72f*s,1.55f*s+bob,.20f,.08f*s,.38f*s,.08f*s,.20f,.70f,1f)
+            box(x+.72f*s,1.55f*s+bob,.20f,.08f*s,.38f*s,.08f*s,.20f,.70f,1f)
+        }
+    }
     private fun box(x:Float,y:Float,z:Float,sx:Float,sy:Float,sz:Float,r:Float,g:Float,b:Float){ Matrix.setIdentityM(m,0); Matrix.translateM(m,0,x,y,z); Matrix.scaleM(m,0,sx,sy,sz); draw(cube,m,r,g,b) }
     private fun ball(x:Float,y:Float,z:Float,sx:Float,sy:Float,sz:Float,r:Float,g:Float,b:Float){ Matrix.setIdentityM(m,0); Matrix.translateM(m,0,x,y,z); Matrix.scaleM(m,0,sx,sy,sz); draw(ball,m,r,g,b) }
     private fun draw(q:Mesh,a:FloatArray,r:Float,g:Float,b:Float){ val z=FloatArray(16); Matrix.multiplyMM(z,0,vp,0,a,0); fx.draw(q,z,r,g,b) }
