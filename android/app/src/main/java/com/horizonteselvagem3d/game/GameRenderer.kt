@@ -526,6 +526,13 @@ class GameRenderer : GLSurfaceView.Renderer {
         }
     }
 
+    private fun cylinder(x: Float, y: Float, z: Float, sx: Float, sy: Float, sz: Float, r: Float, g: Float, b: Float) {
+        Matrix.setIdentityM(m, 0)
+        Matrix.translateM(m, 0, x, y, z)
+        Matrix.scaleM(m, 0, sx, sy, sz)
+        draw(cylinder, m, r, g, b)
+    }
+
     private fun box(x: Float, y: Float, z: Float, sx: Float, sy: Float, sz: Float, r: Float, g: Float, b: Float) {
         Matrix.setIdentityM(m, 0)
         Matrix.translateM(m, 0, x, y, z)
