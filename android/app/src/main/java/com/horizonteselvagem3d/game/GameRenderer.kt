@@ -23,6 +23,7 @@ class GameRenderer : GLSurfaceView.Renderer {
     private lateinit var fx: FloatProgram
     private lateinit var cube: Mesh
     private lateinit var ball: Mesh
+    private lateinit var cylinder: Mesh
     private var form = 0
     private var t = 0f
     private var px = 0f
@@ -50,6 +51,7 @@ class GameRenderer : GLSurfaceView.Renderer {
         fx = FloatProgram()
         cube = Mesh.cube()
         ball = Mesh.ball()
+        cylinder = Mesh.cylinder()
     }
 
     override fun onSurfaceChanged(gl: GL10?, w: Int, h: Int) {
@@ -64,6 +66,7 @@ class GameRenderer : GLSurfaceView.Renderer {
         Matrix.multiplyMM(vp, 0, p, 0, v, 0)
         world()
         hero()
+        farmAnimals()
         mystica()
         if (eggFound && !aurino) egg()
         if (aurino) aurino()
@@ -436,12 +439,53 @@ class GameRenderer : GLSurfaceView.Renderer {
     }
 
     private fun hero() {
-        box(px, 1.25f, pz, .65f, 1.35f, .4f, .14f, .35f, .72f)
-        ball(px, 2.35f, pz, .4f, .48f, .4f, .48f, .32f, .22f)
-        box(px - .5f, 1.15f, pz, .18f, 1.1f, .18f, .12f, .25f, .55f)
-        box(px + .5f, 1.15f, pz, .18f, 1.1f, .18f, .12f, .25f, .55f)
-        box(px - .23f, .1f, pz, .22f, .65f, .22f, .07f, .12f, .22f)
-        box(px + .23f, .1f, pz, .22f, .65f, .22f, .07f, .12f, .22f)
+        // Kael: silhueta humana mais natural, com tronco, pescoço, cabeça, braços e pernas separados.
+        val sway = sin(t * 2.2f) * .035f
+        cylinder(px, 1.42f, pz, .48f, 1.25f, .34f, .12f, .31f, .62f)
+        cylinder(px, 2.05f, pz, .16f, .24f, .16f, .76f, .56f, .38f)
+        ball(px, 2.43f + sway, pz, .34f, .40f, .31f, .58f, .42f, .28f)
+        ball(px, 2.67f + sway, pz + .02f, .29f, .14f, .27f, .08f, .055f, .045f)
+        cylinder(px - .58f, 1.46f, pz + sway, .13f, 1.05f, .13f, .10f, .26f, .52f)
+        cylinder(px + .58f, 1.46f, pz - sway, .13f, 1.05f, .13f, .10f, .26f, .52f)
+        cylinder(px - .22f, .38f, pz, .17f, .72f, .17f, .07f, .11f, .20f)
+        cylinder(px + .22f, .38f, pz, .17f, .72f, .17f, .07f, .11f, .20f)
+        box(px - .22f, .04f, pz + .08f, .22f, .08f, .38f, .045f, .06f, .07f)
+        box(px + .22f, .04f, pz + .08f, .22f, .08f, .38f, .045f, .06f, .07f)
+    }
+
+    private fun farmAnimals() {
+        // Animais reais do cenário rural: modelos simples, mas com proporções reconhecíveis.
+        cow(-13f, -18f, 1f)
+        cow(13f, -27f, 1.08f)
+        horse(-11f, -42f, .95f)
+        horse(14f, -50f, 1.05f)
+    }
+
+    private fun cow(x: Float, z: Float, s: Float) {
+        val bob = sin(t * 1.5f + x) * .025f
+        box(x, .92f + bob, z, .92f*s, .62f*s, .48f*s, .70f, .66f, .56f)
+        ball(x + .85f*s, 1.18f + bob, z, .38f*s, .34f*s, .34f*s, .70f, .66f, .56f)
+        box(x + 1.15f*s, 1.20f + bob, z, .10f*s, .08f*s, .22f*s, .16f, .10f, .07f)
+        box(x + .68f*s, 1.46f + bob, z - .25f*s, .10f*s, .20f*s, .08f*s, .16f, .10f, .07f)
+        box(x + .68f*s, 1.46f + bob, z + .25f*s, .10f*s, .20f*s, .08f*s, .16f, .10f, .07f)
+        for (i in -1..1 step 2) {
+            cylinder(x + .52f*s, .35f, z + i*.25f*s, .11f*s, .62f*s, .11f*s, .28f, .24f, .20f)
+            cylinder(x - .55f*s, .35f, z + i*.25f*s, .11f*s, .62f*s, .11f*s, .28f, .24f, .20f)
+        }
+    }
+
+    private fun horse(x: Float, z: Float, s: Float) {
+        val bob = sin(t * 1.8f + z) * .025f
+        box(x, 1.18f + bob, z, 1.05f*s, .70f*s, .38f*s, .34f, .22f, .12f)
+        cylinder(x + .82f*s, 1.58f + bob, z, .24f*s, .95f*s, .24f*s, .38f, .25f, .14f)
+        ball(x + 1.00f*s, 2.15f + bob, z, .34f*s, .28f*s, .28f*s, .38f, .25f, .14f)
+        box(x + 1.16f*s, 2.28f + bob, z - .14f*s, .08f*s, .22f*s, .08f*s, .18f, .12f, .08f)
+        box(x + 1.16f*s, 2.28f + bob, z + .14f*s, .08f*s, .22f*s, .08f*s, .18f, .12f, .08f)
+        for (i in -1..1 step 2) {
+            cylinder(x + .62f*s, .43f, z + i*.20f*s, .10f*s, .88f*s, .10f*s, .22f, .14f, .09f)
+            cylinder(x - .62f*s, .43f, z + i*.20f*s, .10f*s, .88f*s, .10f*s, .22f, .14f, .09f)
+        }
+        cylinder(x - 1.0f*s, 1.18f + bob, z, .08f*s, .72f*s, .08f*s, .30f, .16f, .09f)
     }
 
     private fun mystica() {
@@ -511,6 +555,19 @@ private class Mesh(private val data: FloatBuffer, val count: Int) {
                 -1f,-1f,-1f, -1f,-1f,1f, -1f,1f,1f, -1f,1f,-1f
             )
             return Mesh(buf(a), 24)
+        }
+        fun cylinder(): Mesh {
+            val a = ArrayList<Float>()
+            val segments = 12
+            for (s in 0 until segments) {
+                val q0 = 2 * Math.PI * s / segments
+                val q1 = 2 * Math.PI * (s + 1) / segments
+                a.add(cos(q0).toFloat()); a.add(-1f); a.add(sin(q0).toFloat())
+                a.add(cos(q1).toFloat()); a.add(-1f); a.add(sin(q1).toFloat())
+                a.add(cos(q0).toFloat()); a.add(1f); a.add(sin(q0).toFloat())
+                a.add(cos(q1).toFloat()); a.add(1f); a.add(sin(q1).toFloat())
+            }
+            return Mesh(buf(a.toFloatArray()), a.size / 3)
         }
         fun ball(): Mesh {
             val a = ArrayList<Float>()
