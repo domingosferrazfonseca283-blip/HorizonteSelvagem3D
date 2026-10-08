@@ -467,6 +467,33 @@ class GameRenderer : GLSurfaceView.Renderer {
         cow(13f, -27f, 1.08f)
         horse(-11f, -42f, .95f)
         horse(14f, -50f, 1.05f)
+        dog(-6f, -22f, .72f)
+        dog(7f, -34f, .68f)
+        bird(-2f, -16f, 4.5f)
+        bird(10f, -39f, 5.2f)
+    }
+
+    private fun dog(x: Float, z: Float, s: Float) {
+        val bob = sin(t * 3.2f + x) * .035f
+        val step = sin(t * 5f + x) * .08f
+        box(x, .58f + bob, z, .48f*s, .32f*s, .28f*s, .42f, .30f, .18f)
+        ball(x + .48f*s, .72f + bob, z, .25f*s, .22f*s, .22f*s, .48f, .34f, .20f)
+        ball(x + .67f*s, .69f + bob, z, .10f*s, .08f*s, .09f*s, .08f, .055f, .04f)
+        box(x + .38f*s, .94f + bob, z - .12f*s, .08f*s, .18f*s, .07f*s, .32f, .20f, .12f)
+        box(x + .38f*s, .94f + bob, z + .12f*s, .08f*s, .18f*s, .07f*s, .32f, .20f, .12f)
+        for (i in -1..1 step 2) {
+            cylinder(x + .25f*s, .18f + step*i, z + i*.17f*s, .07f*s, .36f*s, .07f*s, .30f, .20f, .12f)
+            cylinder(x - .25f*s, .18f - step*i, z + i*.17f*s, .07f*s, .36f*s, .07f*s, .30f, .20f, .12f)
+        }
+        cylinder(x - .55f*s, .68f + bob, z, .055f*s, .32f*s, .055f*s, .42f, .30f, .18f)
+    }
+
+    private fun bird(x: Float, z: Float, y: Float) {
+        val flap = sin(t * 8f + x) * .22f
+        ball(x, y, z, .16f, .11f, .12f, .24f, .24f, .20f)
+        ball(x + .16f, y + .02f, z, .09f, .08f, .08f, .32f, .28f, .18f)
+        box(x - .16f, y + flap, z, .20f, .025f, .08f, .36f, .36f, .30f)
+        box(x + .16f, y - flap, z, .20f, .025f, .08f, .36f, .36f, .30f)
     }
 
     private fun cow(x: Float, z: Float, s: Float) {
