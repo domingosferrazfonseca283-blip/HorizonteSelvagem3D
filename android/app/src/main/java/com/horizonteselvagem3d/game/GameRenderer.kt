@@ -23,6 +23,11 @@ class GameRenderer : GLSurfaceView.Renderer {
     private lateinit var ball: Mesh
     private var form = 0
     private var t = 0f
+    private var px = 0f
+    private var pz = 7f
+    private var eggCare = 0
+    private var eggFound = false
+    private var aurino = false
 
     override fun onSurfaceCreated(gl: GL10?, c: EGLConfig?) {
         GLES20.glClearColor(.03f, .05f, .08f, 1f)
@@ -40,21 +45,62 @@ class GameRenderer : GLSurfaceView.Renderer {
     override fun onDrawFrame(gl: GL10?) {
         t += .016f
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT or GLES20.GL_DEPTH_BUFFER_BIT)
-        Matrix.setLookAtM(v, 0, lookX * 2f, 2.8f + lookY, 8f, 0f, 1.1f, 0f, 0f, 1f, 0f)
+        Matrix.setLookAtM(v, 0, px + lookX * 2f, 2.8f + lookY, pz + 8f, px, 1.1f, pz, 0f, 1f, 0f)
         Matrix.multiplyMM(vp, 0, p, 0, v, 0)
         world()
         hero()
         mystica()
+        if (eggFound && !aurino) egg()
+        if (aurino) aurino()
     }
 
-    fun evolve() { form = (form + 1) % 3 }
+    fun evolve() {
+        if (!eggFound) { eggFound = true; return }
+        if (!aurino) { eggCare++; if (eggCare >= 3) aurino = true; return }
+        form = (form + 1) % 3
+    }
+    fun move(dx: Float, dz: Float) {
+        px = (px + dx).coerceIn(-18f, 18f)
+        pz = (pz + dz).coerceIn(-70f, 18f)
+        if (!eggFound && kotlin.math.abs(px - 7f) < 3f && kotlin.math.abs(pz + 35f) < 4f) eggFound = true
+    }
 
     private fun world() {
-        box(0f, -.15f, 0f, 9f, .15f, 9f, .08f, .24f, .12f)
+        box(0f, -.15f, -25f, 24f, .15f, 70f, .08f, .24f, .12f)
+        box(0f, .01f, -30f, 3.2f, .04f, 60f, .32f, .26f, .18f)
+        // estrada rural, casas, rio e vegetação
+        box(-9f, 1.4f, -14f, 3.2f, 1.4f, 2.6f, .55f, .43f, .30f)
+        box(-9f, 3.4f, -14f, 3.7f, .7f, 3.1f, .34f, .22f, .14f)
+        box(8f, 1.2f, -20f, 2.8f, 1.2f, 2.3f, .58f, .47f, .34f)
+        box(8f, 3.0f, -20f, 3.3f, .65f, 2.8f, .32f, .20f, .12f)
+        box(14f, .02f, -32f, 3.2f, .03f, 35f, .16f, .36f, .48f)
+        for (i in -8..8) {
+            val z = -4f - i * 4.2f
+            box(-15f, 1.6f, z, .35f, 1.6f, .35f, .25f, .13f, .06f)
+            ball(-15f, 3.4f, z, 1.5f, 1.2f, 1.5f, .10f, .28f, .16f)
+            box(17f, 1.4f, z - 1.5f, .32f, 1.4f, .32f, .25f, .13f, .06f)
+            ball(17f, 3.0f, z - 1.5f, 1.4f, 1.1f, 1.4f, .10f, .28f, .16f)
+        }
         box(0f, .01f, 2f, 2.8f, .04f, 6f, .32f, .26f, .18f)
         for (i in -3..3) box(i * 1.8f, .35f, -3.5f, .35f, .7f, .35f, .15f, .34f, .18f)
         val pulse = .8f + .2f * sin(t * 4f)
         box(4f, .65f, -1.8f, .22f, .75f * pulse, .22f, .20f, .65f, .95f)
+    }
+
+    private fun egg() {
+        val pulse = 1f + sin(t * 3f) * .06f
+        ball(7f, .75f * pulse, -35f, .55f, .75f * pulse, .55f, .78f, .68f, .45f)
+        box(7f, .78f, -35f, .62f, .04f, .62f, .28f, .55f, .64f)
+    }
+
+    private fun aurino() {
+        val bob = sin(t * 3f) * .08f
+        val x = px + 1.6f
+        val z = pz - 1.8f
+        ball(x, .75f + bob, z, .55f, .48f, .50f, .37f, .48f, .56f)
+        ball(x, 1.32f + bob, z, .42f, .40f, .42f, .72f, .64f, .46f)
+        box(x + .58f, .55f + bob, z, .10f, .48f, .10f, .48f, .34f, .20f)
+        box(x, 1.78f + bob, z, .16f, .36f, .16f, .56f, .72f, .68f)
     }
 
     private fun hero() {
