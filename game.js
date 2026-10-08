@@ -164,6 +164,25 @@ function updateHud(){
 }
 function setMission(text){$('mission').textContent=text}
 function unlockStoryFlag(flag){storyFlags[flag]=true;save();}
+function updateCompanion(){
+  const m=creatures.find(c=>c.userData.name==='Mística');
+  if(!m||!m.userData.bonded)return;
+  const desired=new THREE.Vector3().setFromMatrixPosition(camera.matrixWorld);
+  desired.add(new THREE.Vector3(2.2,0,2.8).applyQuaternion(camera.quaternion));
+  desired.y=0.8;
+  const dist=m.position.distanceTo(desired);
+  if(dist>2){m.position.lerp(desired,Math.min(0.08,dist*0.02));}
+  const bob=Math.sin(performance.now()*0.004)*0.08;
+  m.position.y=0.8+bob;
+  if(dist>18)m.position.copy(desired);
+}
+function checkCompanionDiscovery(){
+  const m=creatures.find(c=>c.userData.name==='Mística');
+  if(!m||!m.userData.bonded)return;
+  if(!storyFlags.companionTip && camera.position.distanceTo(new THREE.Vector3(27,0,-48))<14){
+    storyFlags.companionTip=true; setMission('Mística percebe algo perto do rio. Explore a margem com ela.'); gainXp(25); save();
+  }
+}
 function checkExploration(){
   if(!storyFlags.river&&camera.position.distanceTo(new THREE.Vector3(27,0,-48))<10){unlockStoryFlag('river');missionStep=Math.max(missionStep,5);setMission('Você chegou ao rio. Observe o ambiente e procure sinais das criaturas.');gainXp(30)}
   if(!storyFlags.mountain&&camera.position.z<-95){unlockStoryFlag('mountain');missionStep=Math.max(missionStep,6);setMission('A estrada termina diante das montanhas. Uma luz azul aparece ao longe.');gainXp(40)}
@@ -258,6 +277,8 @@ function animate(){
     if(camera.position.y<2){camera.position.y=2;velocityY=0}
   }
   if(gameStarted){
+    updateCompanion();
+    checkCompanionDiscovery();
     checkExploration();
     const day=Math.sin(clock.elapsedTime*.035)*.5+.5;
     sun.intensity=1.1+day*2.1;
