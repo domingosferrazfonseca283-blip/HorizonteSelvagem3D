@@ -27,7 +27,7 @@ sun.position.set(-30,50,20); sun.castShadow=true; sun.shadow.mapSize.set(2048,20
 const controls=new PointerLockControls(camera,document.body);
 const keys={};
 let gameStarted=false;
-let xp=0,level=1,energy=100,bond=0,target=null,combat=false,missionStep=0,velocityY=0,lastInteract=0;
+let xp=0,level=1,energy=100,bond=0,target=null,combat=false,missionStep=0,velocityY=0,lastInteract=0,storyFlags={};
 const creatures=[];
 const $=id=>document.getElementById(id);
 
@@ -104,6 +104,12 @@ const villagers=[
  npc(15,-31,'Mateus'),
  npc(-18,-25,'Joana')
 ];
+const npcStories={
+  'Dona Rosa':{text:'“Sou Dona Rosa. As criaturas costumavam aparecer perto do rio. Há dias, porém, elas estão inquietas.”',mission:'Investigue o rio e descubra por que as criaturas estão inquietas.'},
+  'Mateus':{text:'“Sou Mateus. Vi uma luz azul perto das montanhas. Não parecia uma tempestade.”',mission:'Siga a estrada em direção às montanhas e procure a origem da luz azul.'},
+  'Joana':{text:'“Sou Joana. Se Mística escolheu ficar com você, não tente forçar a relação. Ela precisa confiar em você.”',mission:'Passe algum tempo explorando com Mística e fortaleça o vínculo.'}
+};
+for(const v of villagers){v.userData.story=npcStories[v.userData.name];v.userData.talked=false;}
 
 function human(color=0x314c67){
   const g=new THREE.Group(),skin=mat(0xc58f70),cloth=mat(color);
@@ -141,13 +147,13 @@ const pa=[];for(let i=0;i<900;i++)pa.push((Math.random()-.5)*190,Math.random()*2
 particles.geometry.setAttribute('position',new THREE.Float32BufferAttribute(pa,3));scene.add(particles);
 
 function save(){
-  localStorage.setItem(SAVE_KEY,JSON.stringify({xp,level,energy,bond,missionStep,misticaBonded:!!creatures[0]?.userData.bonded}));
+  localStorage.setItem(SAVE_KEY,JSON.stringify({xp,level,energy,bond,missionStep,storyFlags,misticaBonded:!!creatures[0]?.userData.bonded}));
 }
 function load(){
   try{
     const s=JSON.parse(localStorage.getItem(SAVE_KEY)||'null'); if(!s)return false;
     xp=Number.isFinite(s.xp)?s.xp:0;level=Number.isFinite(s.level)?s.level:1;energy=Number.isFinite(s.energy)?s.energy:100;
-    bond=Number.isFinite(s.bond)?s.bond:0;missionStep=Number.isFinite(s.missionStep)?s.missionStep:0;
+    bond=Number.isFinite(s.bond)?s.bond:0;missionStep=Number.isFinite(s.missionStep)?s.missionStep:0;storyFlags=s.storyFlags&&typeof s.storyFlags==='object'?s.storyFlags:{};
     if(s.misticaBonded&&creatures[0]){creatures[0].userData.bonded=true;creatures[0].userData.alive=true;}
     return true;
   }catch{return false}
@@ -157,6 +163,11 @@ function updateHud(){
   const x=Math.round(camera.position.x),z=Math.round(-camera.position.z);$('coords').textContent=`${x}, ${z}`;
 }
 function setMission(text){$('mission').textContent=text}
+function unlockStoryFlag(flag){storyFlags[flag]=true;save();}
+function checkExploration(){
+  if(!storyFlags.river&&camera.position.distanceTo(new THREE.Vector3(27,0,-48))<10){unlockStoryFlag('river');missionStep=Math.max(missionStep,5);setMission('Você chegou ao rio. Observe o ambiente e procure sinais das criaturas.');gainXp(30)}
+  if(!storyFlags.mountain&&camera.position.z<-95){unlockStoryFlag('mountain');missionStep=Math.max(missionStep,6);setMission('A estrada termina diante das montanhas. Uma luz azul aparece ao longe.');gainXp(40)}
+}
 function chapter(title,text,cb){
   $('chapterTitle').textContent=title;$('chapterText').textContent=text;$('chapter').classList.remove('hidden');
   $('chapterBtn').onclick=()=>{$('chapter').classList.add('hidden');if(cb)cb()};
@@ -219,7 +230,15 @@ addEventListener('keydown',e=>{
   if(e.code==='KeyF')startCombat();
   if(e.code==='KeyQ'){
     const n=villagers.reduce((best,v)=>{const d=v.position.distanceTo(camera.position);return d<(best?.d??99)?{v,d}:best},null);
-    if(n&&n.d<7){$('dialogText').textContent=n.v.userData.name+': “As criaturas fazem parte da nossa terra. Se quiser conhecê-las, caminhe com respeito.”';$('dialog').classList.remove('hidden');$('dialogBtn').onclick=()=>{$('dialog').classList.add('hidden');gainXp(15);setMission('Converse com os moradores e descubra os caminhos da região.');save()}}
+    if(n&&n.d<7){
+  const story=n.v.userData.story;
+  $('dialogText').textContent=story.text;
+  $('dialog').classList.remove('hidden');
+  $('dialogBtn').onclick=()=>{
+    $('dialog').classList.add('hidden');n.v.userData.talked=true;gainXp(15);
+    setMission(story.mission);save();
+  }
+}
   }
   if(e.code==='Escape'&&gameStarted){$('menu').classList.toggle('hidden')}
 });
@@ -239,6 +258,7 @@ function animate(){
     if(camera.position.y<2){camera.position.y=2;velocityY=0}
   }
   if(gameStarted){
+    checkExploration();
     const day=Math.sin(clock.elapsedTime*.035)*.5+.5;
     sun.intensity=1.1+day*2.1;
     scene.background.setHSL(.48,.08,.32+day*.14);
