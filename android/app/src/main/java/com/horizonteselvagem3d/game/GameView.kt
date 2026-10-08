@@ -11,6 +11,7 @@ import android.opengl.GLSurfaceView
 class GameView(context: Context) : FrameLayout(context) {
     private val surface = GLSurfaceView(context)
     private val renderer = GameRenderer()
+    private val prefs = context.getSharedPreferences("horizonte_selvagem_progress", Context.MODE_PRIVATE)
     private var lastX = 0f
     private var lastY = 0f
     private val mission = TextView(context)
@@ -20,6 +21,7 @@ class GameView(context: Context) : FrameLayout(context) {
         surface.setRenderer(renderer)
         surface.renderMode = GLSurfaceView.RENDERMODE_CONTINUOUSLY
         addView(surface, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT))
+        renderer.loadState(prefs)
 
         mission.setTextColor(Color.WHITE)
         mission.setTextSize(16f)
@@ -39,6 +41,7 @@ class GameView(context: Context) : FrameLayout(context) {
         action.setPadding(30, 18, 30, 18)
         action.setOnClickListener {
             renderer.action()
+            renderer.saveState(prefs)
             mission.text = renderer.missionText()
         }
         val actionParams = LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT)
