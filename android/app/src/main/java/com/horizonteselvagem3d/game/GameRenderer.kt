@@ -34,6 +34,11 @@ class GameRenderer : GLSurfaceView.Renderer {
     private var riverVisited = false
     private var mountainVisited = false
     private var missionStage = 0
+    private var chapter2Stage = 0
+    private var redFieldVisited = false
+    private var springVisited = false
+    private var lumeaMet = false
+    private var lumeaBonded = false
     private var mission = "Explore o vale rural e encontre Mística."
 
     override fun onSurfaceCreated(gl: GL10?, c: EGLConfig?) {
@@ -59,18 +64,57 @@ class GameRenderer : GLSurfaceView.Renderer {
         mystica()
         if (eggFound && !aurino) egg()
         if (aurino) aurino()
+        if (lumeaBonded) lumea()
     }
 
     fun evolve() = action()
 
     fun action() {
-        if (aurino) {
-            mission = "Capítulo 1 concluído. Aurino está com você. A luz azul aguarda nas montanhas."
+        if (aurino && chapter2Stage == 0) {
+            chapter2Stage = 1
+            mission = "Capítulo 2: atravesse a passagem azul e explore os Campos Vermelhos."
+            return
+        }
+        if (chapter2Stage >= 5) {
+            mission = "Capítulo 2 concluído. Uma nova trilha se abre além dos campos."
             return
         }
 
         val eggDistance = distance(px, pz, 7f, -35f)
+        val oldMillDistance = distance(px, pz, -9f, -82f)
+        val springDistance = distance(px, pz, -4f, -108f)
+        val lumeaDistance = distance(px, pz, 10f, -92f)
         val mysticaDistance = distance(px, pz, 1.55f, 0f)
+
+        if (chapter2Stage >= 1 && chapter2Stage < 5) {
+            if (oldMillDistance < 6f && chapter2Stage == 1) {
+                chapter2Stage = 2
+                mission = "A passagem termina num moinho antigo. Procure o campo vermelho ao norte."
+                return
+            }
+            if (chapter2Stage == 2 && redFieldVisited) {
+                chapter2Stage = 3
+                mission = "O campo reage à presença de Aurino. Encontre a criatura que está observando de longe."
+                return
+            }
+            if (chapter2Stage == 3 && lumeaDistance < 5f && !lumeaMet) {
+                lumeaMet = true
+                mission = "Uma criatura chamada Lumea observa você. Aproxime-se novamente para formar confiança."
+                return
+            }
+            if (chapter2Stage == 3 && lumeaMet && lumeaDistance < 5f) {
+                lumeaBonded = true
+                chapter2Stage = 4
+                mission = "Lumea escolheu caminhar ao seu lado. Agora encontre a nascente."
+                return
+            }
+            if (chapter2Stage == 4 && springDistance < 7f) {
+                springVisited = true
+                chapter2Stage = 5
+                mission = "A nascente estabilizou a luz azul. Capítulo 2 concluído."
+                return
+            }
+        }
 
         if (!mysticaBonded && mysticaDistance < 5f) {
             mysticaBonded = true
@@ -126,7 +170,7 @@ class GameRenderer : GLSurfaceView.Renderer {
 
     fun move(dx: Float, dz: Float) {
         px = (px + dx).coerceIn(-18f, 18f)
-        pz = (pz + dz).coerceIn(-70f, 18f)
+        pz = (pz + dz).coerceIn(-118f, 18f)
 
         if (mysticaBonded && missionStage == 1 && distance(px, pz, 14f, -32f) < 7f) {
             riverVisited = true
@@ -138,6 +182,20 @@ class GameRenderer : GLSurfaceView.Renderer {
             mountainVisited = true
             missionStage = 3
             mission = "Você encontrou a origem do sinal. Volte e procure o ovo."
+        }
+
+        if (aurino && chapter2Stage == 1 && distance(px, pz, 0f, -72f) < 10f) {
+            mission = "A passagem azul está logo adiante. Explore a nova região."
+        }
+        if (chapter2Stage == 2 && distance(px, pz, 3f, -76f) < 9f) {
+            redFieldVisited = true
+            mission = "Os Campos Vermelhos respondem à energia de Aurino. Volte ao moinho."
+        }
+        if (chapter2Stage == 3 && distance(px, pz, 10f, -92f) < 5f) {
+            mission = "Há uma criatura observando entre as plantações. Use AÇÃO."
+        }
+        if (chapter2Stage == 4 && distance(px, pz, -4f, -108f) < 7f) {
+            mission = "A nascente está diante de você. Use AÇÃO."
         }
 
         if (missionStage >= 3 && !eggFound && distance(px, pz, 7f, -35f) < 5f) {
@@ -153,6 +211,11 @@ class GameRenderer : GLSurfaceView.Renderer {
             .putBoolean("mountainVisited", mountainVisited)
             .putInt("missionStage", missionStage)
             .putInt("eggCare", eggCare)
+            .putInt("chapter2Stage", chapter2Stage)
+            .putBoolean("redFieldVisited", redFieldVisited)
+            .putBoolean("springVisited", springVisited)
+            .putBoolean("lumeaMet", lumeaMet)
+            .putBoolean("lumeaBonded", lumeaBonded)
             .apply()
     }
 
@@ -164,8 +227,14 @@ class GameRenderer : GLSurfaceView.Renderer {
         mountainVisited = prefs.getBoolean("mountainVisited", false)
         missionStage = prefs.getInt("missionStage", if (aurino) 5 else if (eggFound) 4 else if (mysticaBonded) 1 else 0)
         eggCare = prefs.getInt("eggCare", 0)
+        chapter2Stage = prefs.getInt("chapter2Stage", 0)
+        redFieldVisited = prefs.getBoolean("redFieldVisited", false)
+        springVisited = prefs.getBoolean("springVisited", false)
+        lumeaMet = prefs.getBoolean("lumeaMet", false)
+        lumeaBonded = prefs.getBoolean("lumeaBonded", false)
         mission = when {
-            aurino -> "Capítulo 1 concluído. Aurino está com você. A luz azul aguarda nas montanhas."
+            chapter2Stage >= 5 -> "Capítulo 2 concluído. Uma nova trilha se abre além dos campos."
+            aurino -> "Capítulo 2: atravesse a passagem azul e explore os Campos Vermelhos."
             eggFound -> "O ovo misterioso está com você. Continue cuidando dele."
             mysticaBonded -> when (missionStage) { 1 -> "Objetivo: investigue a margem do rio."; 2 -> "Objetivo: siga a estrada até as montanhas."; else -> "Mística está com você. Procure a próxima pista." }
             else -> "Explore o vale rural e encontre Mística."
@@ -222,6 +291,40 @@ class GameRenderer : GLSurfaceView.Renderer {
         box(-11f, 5.5f, -61f, 8f, 5.5f, 1.8f, .12f, .20f, .18f)
         box(0f, 7.5f, -64f, 10f, 7.5f, 2.0f, .10f, .17f, .16f)
         box(12f, 5f, -60f, 7f, 5f, 1.8f, .13f, .21f, .18f)
+
+        // Capítulo 2: Campos Vermelhos e a nascente azul.
+        box(0f, -.12f, -94f, 24f, .12f, 48f, .26f, .18f, .10f)
+        box(3f, .02f, -76f, 3.2f, .04f, 18f, .48f, .28f, .12f)
+        box(-9f, 1.2f, -82f, 3.4f, 1.2f, 2.8f, .42f, .28f, .16f)
+        box(-9f, 3.0f, -82f, 3.8f, .65f, 3.0f, .30f, .18f, .10f)
+        for (i in -4..4) {
+            val z = -78f - i * 4.8f
+            box(7f, .28f, z, 1.6f, .28f, .18f, .58f, .30f, .10f)
+            box(9.2f, .32f, z + 1.1f, 1.8f, .32f, .18f, .64f, .34f, .12f)
+        }
+        beacon(-9f, -82f, .72f, .32f, .12f)
+        beacon(3f, -76f, .72f, .18f, .10f)
+        beacon(-4f, -108f, .18f, .55f, .82f)
+        npc(4f, -78f, .58f, .38f, .20f)
+
+        if (lumeaMet || chapter2Stage >= 3) lumea()
+
+        box(-10f, 2.8f, -114f, 7f, 2.8f, 1.6f, .10f, .16f, .18f)
+        box(8f, 3.6f, -116f, 8f, 3.6f, 1.8f, .08f, .13f, .16f)
+    }
+
+
+    private fun lumea() {
+        val bob = sin(t * 2.8f) * .08f
+        val x = if (lumeaBonded) px - 1.7f else 10f
+        val z = if (lumeaBonded) pz - 2.0f else -92f
+        ball(x, .65f + bob, z, .52f, .38f, .58f, .62f, .30f, .16f)
+        ball(x, 1.12f + bob, z - .05f, .38f, .34f, .40f, .78f, .48f, .22f)
+        box(x - .34f, 1.48f + bob, z, .10f, .28f, .10f, .72f, .28f, .12f)
+        box(x + .34f, 1.48f + bob, z, .10f, .28f, .10f, .72f, .28f, .12f)
+        ball(x - .14f, 1.18f + bob, z - .38f, .055f, .055f, .04f, .95f, .90f, .62f)
+        ball(x + .14f, 1.18f + bob, z - .38f, .055f, .055f, .04f, .95f, .90f, .62f)
+        box(x + .62f, .55f + bob, z + .08f, .12f, .16f, .40f, .76f, .38f, .14f)
     }
 
     private fun beacon(x: Float, z: Float, r: Float, g: Float, b: Float) {
