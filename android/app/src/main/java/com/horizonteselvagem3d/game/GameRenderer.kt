@@ -31,6 +31,9 @@ class GameRenderer : GLSurfaceView.Renderer {
     private var eggFound = false
     private var aurino = false
     private var mysticaBonded = false
+    private var riverVisited = false
+    private var mountainVisited = false
+    private var missionStage = 0
     private var mission = "Explore o vale rural e encontre Mística."
 
     override fun onSurfaceCreated(gl: GL10?, c: EGLConfig?) {
@@ -62,7 +65,7 @@ class GameRenderer : GLSurfaceView.Renderer {
 
     fun action() {
         if (aurino) {
-            mission = "Aurino está com você. Continue explorando."
+            mission = "Capítulo 1 concluído. Aurino está com você. A luz azul aguarda nas montanhas."
             return
         }
 
@@ -71,54 +74,84 @@ class GameRenderer : GLSurfaceView.Renderer {
 
         if (!mysticaBonded && mysticaDistance < 5f) {
             mysticaBonded = true
-            mission = "Mística confiou em você. Explore o vale com ela."
+            missionStage = 1
+            mission = "Mística confiou em você. Agora investigue o rio."
             return
         }
 
         val npc = nearestNpc()
         if (npc != null && npc.distance < 4f) {
             mission = when (npc.name) {
-                "Dona Rosa" -> "Dona Rosa: o rio anda deixando as criaturas inquietas. Investigue a margem."
-                "Mateus" -> "Mateus: vi uma luz azul atrás das montanhas. A estrada leva até lá."
-                else -> "Joana: não force Mística. Caminhe com ela e deixe a confiança crescer."
+                "Dona Rosa" -> if (missionStage >= 1) "Dona Rosa: a margem está estranha. Procure o brilho perto da água."
+                    else "Dona Rosa: o rio anda deixando as criaturas inquietas. Primeiro encontre Mística."
+                "Mateus" -> if (missionStage >= 2) "Mateus: a luz veio das montanhas. Siga a estrada azul."
+                    else "Mateus: vi uma luz azul atrás das montanhas. Primeiro investigue o rio."
+                else -> if (missionStage >= 3) "Joana: Mística e você já estão no mesmo caminho. Proteja o ovo."
+                    else "Joana: não force Mística. Caminhe com ela e deixe a confiança crescer."
             }
             return
         }
 
         if (eggDistance < 5f) {
+            if (missionStage < 3) {
+                mission = "O ovo está aqui, mas algo ainda falta. Explore o rio e as montanhas."
+                return
+            }
             if (!eggFound) {
                 eggFound = true
+                missionStage = 4
                 mission = "Você encontrou um ovo misterioso. Cuide dele."
             } else {
                 eggCare++
                 mission = "Você cuidou do ovo: $eggCare/3"
                 if (eggCare >= 3) {
                     aurino = true
-                    mission = "Aurino nasceu. Uma nova jornada começa."
+                    missionStage = 5
+                    mission = "Aurino nasceu. A luz azul pulsa atrás das montanhas."
                 }
             }
             return
         }
 
-        mission = "Explore o vale e procure sinais perto do rio e das montanhas."
+        mission = when (missionStage) {
+            0 -> "Encontre Mística no vilarejo."
+            1 -> "Objetivo: investigue a margem do rio."
+            2 -> "Objetivo: siga a estrada até as montanhas."
+            3 -> "Objetivo: procure o ovo misterioso."
+            4 -> "Objetivo: cuide do ovo até ele despertar."
+            else -> "Explore o vale e procure a próxima pista."
+        }
     }
-
     fun missionText(): String = mission
 
     fun move(dx: Float, dz: Float) {
         px = (px + dx).coerceIn(-18f, 18f)
         pz = (pz + dz).coerceIn(-70f, 18f)
-        if (!eggFound && distance(px, pz, 7f, -35f) < 5f) {
-            eggFound = true
-            mission = "Você encontrou um ovo misterioso. Use AÇÃO para cuidar dele."
+
+        if (mysticaBonded && missionStage == 1 && distance(px, pz, 14f, -32f) < 7f) {
+            riverVisited = true
+            missionStage = 2
+            mission = "A água emite um brilho azul. Agora siga para as montanhas."
+        }
+
+        if (riverVisited && missionStage == 2 && distance(px, pz, 10f, -55f) < 9f) {
+            mountainVisited = true
+            missionStage = 3
+            mission = "Você encontrou a origem do sinal. Volte e procure o ovo."
+        }
+
+        if (missionStage >= 3 && !eggFound && distance(px, pz, 7f, -35f) < 5f) {
+            mission = "Há algo escondido aqui. Use AÇÃO para investigar."
         }
     }
-
     fun saveState(prefs: SharedPreferences) {
         prefs.edit()
             .putBoolean("mysticaBonded", mysticaBonded)
             .putBoolean("eggFound", eggFound)
             .putBoolean("aurino", aurino)
+            .putBoolean("riverVisited", riverVisited)
+            .putBoolean("mountainVisited", mountainVisited)
+            .putInt("missionStage", missionStage)
             .putInt("eggCare", eggCare)
             .apply()
     }
@@ -127,11 +160,14 @@ class GameRenderer : GLSurfaceView.Renderer {
         mysticaBonded = prefs.getBoolean("mysticaBonded", false)
         eggFound = prefs.getBoolean("eggFound", false)
         aurino = prefs.getBoolean("aurino", false)
+        riverVisited = prefs.getBoolean("riverVisited", false)
+        mountainVisited = prefs.getBoolean("mountainVisited", false)
+        missionStage = prefs.getInt("missionStage", if (aurino) 5 else if (eggFound) 4 else if (mysticaBonded) 1 else 0)
         eggCare = prefs.getInt("eggCare", 0)
         mission = when {
-            aurino -> "Aurino está com você. Continue explorando."
+            aurino -> "Capítulo 1 concluído. Aurino está com você. A luz azul aguarda nas montanhas."
             eggFound -> "O ovo misterioso está com você. Continue cuidando dele."
-            mysticaBonded -> "Mística está com você. Explore o vale."
+            mysticaBonded -> when (missionStage) { 1 -> "Objetivo: investigue a margem do rio."; 2 -> "Objetivo: siga a estrada até as montanhas."; else -> "Mística está com você. Procure a próxima pista." }
             else -> "Explore o vale rural e encontre Mística."
         }
     }
@@ -181,6 +217,11 @@ class GameRenderer : GLSurfaceView.Renderer {
 
         val pulse = .8f + .2f * sin(t * 4f)
         box(4f, .65f, -1.8f, .22f, .75f * pulse, .22f, .20f, .65f, .95f)
+
+        // Silhuetas das montanhas: um alvo visual para a segunda etapa da missão.
+        box(-11f, 5.5f, -61f, 8f, 5.5f, 1.8f, .12f, .20f, .18f)
+        box(0f, 7.5f, -64f, 10f, 7.5f, 2.0f, .10f, .17f, .16f)
+        box(12f, 5f, -60f, 7f, 5f, 1.8f, .13f, .21f, .18f)
     }
 
     private fun beacon(x: Float, z: Float, r: Float, g: Float, b: Float) {
