@@ -627,6 +627,10 @@ class GameRenderer : GLSurfaceView.Renderer {
         sphere(x, y + sy, z, sx, sx, sx, r, g, b)
     }
 
+    private fun sphere(x: Float, y: Float, z: Float, sx: Float, sy: Float, sz: Float, r: Float, g: Float, b: Float) {
+        ball(x, y, z, sx, sy, sz, r, g, b)
+    }
+
     private fun box(x: Float, y: Float, z: Float, sx: Float, sy: Float, sz: Float, r: Float, g: Float, b: Float) {
         Matrix.setIdentityM(m, 0)
         Matrix.translateM(m, 0, x, y, z)
