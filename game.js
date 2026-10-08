@@ -27,7 +27,7 @@ sun.position.set(-30,50,20); sun.castShadow=true; sun.shadow.mapSize.set(2048,20
 const controls=new PointerLockControls(camera,document.body);
 const keys={};
 let gameStarted=false;
-let xp=0,level=1,energy=100,bond=0,target=null,combat=false,missionStep=0,velocityY=0,lastInteract=0,storyFlags={};
+let xp=0,level=1,energy=100,bond=0,target=null,combat=false,missionStep=0,velocityY=0,lastInteract=0,storyFlags={},egg=null;
 const creatures=[];
 const $=id=>document.getElementById(id);
 
@@ -99,6 +99,49 @@ function npc(x,z,name){
   const n=human(0x7a5a3c);n.position.set(x,0,z);n.userData={npc:true,name,phase:Math.random()*5};
   scene.add(n);return n;
 }
+function createMysticEgg(){
+  const g=new THREE.Group();
+  const shell=new THREE.Mesh(new THREE.SphereGeometry(0.65,20,20),new THREE.MeshStandardMaterial({color:0xd8c7a4,roughness:0.7,emissive:0x332211,emissiveIntensity:0.12}));
+  shell.scale.set(0.82,1.15,0.82);g.add(shell);
+  const ring=new THREE.Mesh(new THREE.TorusGeometry(0.47,0.035,8,32),new THREE.MeshStandardMaterial({color:0x6e8f9d,emissive:0x18303a,emissiveIntensity:0.7}));
+  ring.rotation.x=Math.PI/2;g.add(ring);
+  g.userData.isEgg=true;g.userData.name='Ovo Misterioso';g.visible=false;scene.add(g);return g;
+}
+function createHatchedCompanion(){
+  const g=new THREE.Group();
+  const body=new THREE.Mesh(new THREE.IcosahedronGeometry(0.55,1),new THREE.MeshStandardMaterial({color:0x5f7890,roughness:0.65}));
+  g.add(body);
+  const head=new THREE.Mesh(new THREE.SphereGeometry(0.42,16,16),new THREE.MeshStandardMaterial({color:0xc9b98c,roughness:0.8}));
+  head.position.set(0,0.58,0);g.add(head);
+  const tool=new THREE.Mesh(new THREE.BoxGeometry(0.16,0.9,0.16),new THREE.MeshStandardMaterial({color:0x7b5a3c,roughness:0.8}));
+  tool.position.set(0.62,0.15,0);tool.rotation.z=-0.35;g.add(tool);
+  const crest=new THREE.Mesh(new THREE.ConeGeometry(0.18,0.42,6),new THREE.MeshStandardMaterial({color:0x91b9b0,emissive:0x17302b,emissiveIntensity:0.5}));
+  crest.position.set(0,0.98,0);g.add(crest);
+  g.position.copy(camera.position).add(new THREE.Vector3(2,0,2));g.position.y=0.8;
+  g.userData={name:'Aurino',hp:80,maxHp:80,trust:15,bonded:false,isCreature:true,state:'calm',speed:0.06};
+  scene.add(g);creatures.push(g);return g;
+}
+function spawnEgg(){
+  if(egg)return;
+  egg=createMysticEgg();egg.position.set(48,0.7,-82);
+}
+function updateEgg(){
+  if(!egg)return;
+  const d=camera.position.distanceTo(egg.position);
+  if(!storyFlags.eggFound && d<7){
+    storyFlags.eggFound=true;egg.visible=true;missionStep=Math.max(missionStep,7);
+    setMission('Você encontrou um ovo misterioso. Proteja-o durante a jornada.');gainXp(50);save();
+  }
+  if(storyFlags.eggFound&&!storyFlags.eggHatched){
+    egg.visible=true;
+    const progress=Math.min(1,(storyFlags.eggCare||0)/3);
+    egg.rotation.y+=0.01;
+    if(d<9 && (storyFlags.river||storyFlags.mountain)){
+      storyFlags.eggCare=Math.min(3,(storyFlags.eggCare||0)+0.002);
+      if(progress>0.98){storyFlags.eggHatched=true;egg.visible=false;const a=createHatchedCompanion();setMission('O ovo nasceu. Conheça Aurino e descubra por que ele veio até você.');gainXp(100);save();}
+    }
+  }
+}
 const villagers=[
  npc(-3,-28,'Dona Rosa'),
  npc(15,-31,'Mateus'),
@@ -153,7 +196,7 @@ function load(){
   try{
     const s=JSON.parse(localStorage.getItem(SAVE_KEY)||'null'); if(!s)return false;
     xp=Number.isFinite(s.xp)?s.xp:0;level=Number.isFinite(s.level)?s.level:1;energy=Number.isFinite(s.energy)?s.energy:100;
-    bond=Number.isFinite(s.bond)?s.bond:0;missionStep=Number.isFinite(s.missionStep)?s.missionStep:0;storyFlags=s.storyFlags&&typeof s.storyFlags==='object'?s.storyFlags:{};
+    bond=Number.isFinite(s.bond)?s.bond:0;missionStep=Number.isFinite(s.missionStep)?s.missionStep:0;storyFlags=s.storyFlags&&typeof s.storyFlags==='object'?s.storyFlags:{}; if(storyFlags.eggFound&&!storyFlags.eggHatched){spawnEgg();}
     if(s.misticaBonded&&creatures[0]){creatures[0].userData.bonded=true;creatures[0].userData.alive=true;}
     return true;
   }catch{return false}
@@ -164,6 +207,7 @@ function updateHud(){
 }
 function setMission(text){$('mission').textContent=text}
 function unlockStoryFlag(flag){storyFlags[flag]=true;save();}
+function initWorldStory(){spawnEgg();}
 function updateCompanion(){
   const m=creatures.find(c=>c.userData.name==='Mística');
   if(!m||!m.userData.bonded)return;
@@ -277,6 +321,8 @@ function animate(){
     if(camera.position.y<2){camera.position.y=2;velocityY=0}
   }
   if(gameStarted){
+    if(!egg)initWorldStory();
+    updateEgg();
     updateCompanion();
     checkCompanionDiscovery();
     checkExploration();
