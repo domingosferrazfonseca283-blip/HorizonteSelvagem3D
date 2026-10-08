@@ -28,6 +28,8 @@ class GameRenderer : GLSurfaceView.Renderer {
     private var eggCare = 0
     private var eggFound = false
     private var aurino = false
+    private var mysticaBonded = false
+    private var mission = "Explore o vale rural e encontre Mística."
 
     override fun onSurfaceCreated(gl: GL10?, c: EGLConfig?) {
         GLES20.glClearColor(.03f, .05f, .08f, 1f)
@@ -55,10 +57,37 @@ class GameRenderer : GLSurfaceView.Renderer {
     }
 
     fun evolve() {
-        if (!eggFound) { eggFound = true; return }
-        if (!aurino) { eggCare++; if (eggCare >= 3) aurino = true; return }
-        form = (form + 1) % 3
+        action()
     }
+
+    fun action() {
+        if (aurino) {
+            mission = "Aurino está com você. Continue explorando."
+            return
+        }
+        val eggDistance = kotlin.math.sqrt((px - 7f) * (px - 7f) + (pz + 35f) * (pz + 35f))
+        val mysticaDistance = kotlin.math.sqrt((px - 1.55f) * (px - 1.55f) + pz * pz)
+        if (!mysticaBonded && mysticaDistance < 5f) {
+            mysticaBonded = true
+            mission = "Mística confiou em você. Explore o vale com ela."
+        } else if (eggDistance < 5f) {
+            if (!eggFound) {
+                eggFound = true
+                mission = "Você encontrou um ovo misterioso. Cuide dele."
+            } else {
+                eggCare++
+                mission = "Você cuidou do ovo: $eggCare/3"
+                if (eggCare >= 3) {
+                    aurino = true
+                    mission = "Aurino nasceu. Uma nova jornada começa."
+                }
+            }
+        } else {
+            mission = "Explore o vale e procure sinais perto do rio e das montanhas."
+        }
+    }
+
+    fun missionText(): String = mission
     fun move(dx: Float, dz: Float) {
         px = (px + dx).coerceIn(-18f, 18f)
         pz = (pz + dz).coerceIn(-70f, 18f)
@@ -114,7 +143,7 @@ class GameRenderer : GLSurfaceView.Renderer {
 
     private fun mystica() {
         val s = when (form) { 0 -> 1f; 1 -> 1.3f; else -> 1.65f }
-        val x = 1.55f
+        val x = if (mysticaBonded) px + 1.7f else 1.55f
         val bob = sin(t * 3f) * .06f
         ball(x, .72f * s + bob, .25f, .58f * s, .48f * s, .62f * s, .18f, .28f, .62f)
         ball(x, 1.32f * s + bob, .25f, .46f * s, .43f * s, .46f * s, .28f, .42f, .78f)
