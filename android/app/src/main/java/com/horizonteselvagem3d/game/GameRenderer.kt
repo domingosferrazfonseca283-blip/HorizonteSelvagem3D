@@ -1,5 +1,6 @@
 package com.horizonteselvagem3d.game
 
+import android.content.SharedPreferences
 import android.opengl.GLES20
 import android.opengl.GLSurfaceView
 import android.opengl.Matrix
@@ -10,6 +11,7 @@ import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
 import kotlin.math.cos
 import kotlin.math.sin
+import kotlin.math.sqrt
 
 class GameRenderer : GLSurfaceView.Renderer {
     var lookX = 0f
@@ -56,21 +58,34 @@ class GameRenderer : GLSurfaceView.Renderer {
         if (aurino) aurino()
     }
 
-    fun evolve() {
-        action()
-    }
+    fun evolve() = action()
 
     fun action() {
         if (aurino) {
             mission = "Aurino está com você. Continue explorando."
             return
         }
-        val eggDistance = kotlin.math.sqrt((px - 7f) * (px - 7f) + (pz + 35f) * (pz + 35f))
-        val mysticaDistance = kotlin.math.sqrt((px - 1.55f) * (px - 1.55f) + pz * pz)
+
+        val eggDistance = distance(px, pz, 7f, -35f)
+        val mysticaDistance = distance(px, pz, 1.55f, 0f)
+
         if (!mysticaBonded && mysticaDistance < 5f) {
             mysticaBonded = true
             mission = "Mística confiou em você. Explore o vale com ela."
-        } else if (eggDistance < 5f) {
+            return
+        }
+
+        val npc = nearestNpc()
+        if (npc != null && npc.distance < 4f) {
+            mission = when (npc.name) {
+                "Dona Rosa" -> "Dona Rosa: o rio anda deixando as criaturas inquietas. Investigue a margem."
+                "Mateus" -> "Mateus: vi uma luz azul atrás das montanhas. A estrada leva até lá."
+                else -> "Joana: não force Mística. Caminhe com ela e deixe a confiança crescer."
+            }
+            return
+        }
+
+        if (eggDistance < 5f) {
             if (!eggFound) {
                 eggFound = true
                 mission = "Você encontrou um ovo misterioso. Cuide dele."
@@ -82,27 +97,68 @@ class GameRenderer : GLSurfaceView.Renderer {
                     mission = "Aurino nasceu. Uma nova jornada começa."
                 }
             }
-        } else {
-            mission = "Explore o vale e procure sinais perto do rio e das montanhas."
+            return
         }
+
+        mission = "Explore o vale e procure sinais perto do rio e das montanhas."
     }
 
     fun missionText(): String = mission
+
     fun move(dx: Float, dz: Float) {
         px = (px + dx).coerceIn(-18f, 18f)
         pz = (pz + dz).coerceIn(-70f, 18f)
-        if (!eggFound && kotlin.math.abs(px - 7f) < 3f && kotlin.math.abs(pz + 35f) < 4f) eggFound = true
+        if (!eggFound && distance(px, pz, 7f, -35f) < 5f) {
+            eggFound = true
+            mission = "Você encontrou um ovo misterioso. Use AÇÃO para cuidar dele."
+        }
     }
+
+    fun saveState(prefs: SharedPreferences) {
+        prefs.edit()
+            .putBoolean("mysticaBonded", mysticaBonded)
+            .putBoolean("eggFound", eggFound)
+            .putBoolean("aurino", aurino)
+            .putInt("eggCare", eggCare)
+            .apply()
+    }
+
+    fun loadState(prefs: SharedPreferences) {
+        mysticaBonded = prefs.getBoolean("mysticaBonded", false)
+        eggFound = prefs.getBoolean("eggFound", false)
+        aurino = prefs.getBoolean("aurino", false)
+        eggCare = prefs.getInt("eggCare", 0)
+        mission = when {
+            aurino -> "Aurino está com você. Continue explorando."
+            eggFound -> "O ovo misterioso está com você. Continue cuidando dele."
+            mysticaBonded -> "Mística está com você. Explore o vale."
+            else -> "Explore o vale rural e encontre Mística."
+        }
+    }
+
+    private data class Npc(val name: String, val x: Float, val z: Float, val distance: Float)
+
+    private fun nearestNpc(): Npc? {
+        val npcs = listOf(
+            Npc("Dona Rosa", -7f, -12f, distance(px, pz, -7f, -12f)),
+            Npc("Mateus", 10f, -24f, distance(px, pz, 10f, -24f)),
+            Npc("Joana", -5f, -30f, distance(px, pz, -5f, -30f))
+        )
+        return npcs.minByOrNull { it.distance }
+    }
+
+    private fun distance(x1: Float, z1: Float, x2: Float, z2: Float): Float =
+        sqrt((x1 - x2) * (x1 - x2) + (z1 - z2) * (z1 - z2))
 
     private fun world() {
         box(0f, -.15f, -25f, 24f, .15f, 70f, .08f, .24f, .12f)
         box(0f, .01f, -30f, 3.2f, .04f, 60f, .32f, .26f, .18f)
-        // estrada rural, casas, rio e vegetação
         box(-9f, 1.4f, -14f, 3.2f, 1.4f, 2.6f, .55f, .43f, .30f)
         box(-9f, 3.4f, -14f, 3.7f, .7f, 3.1f, .34f, .22f, .14f)
         box(8f, 1.2f, -20f, 2.8f, 1.2f, 2.3f, .58f, .47f, .34f)
         box(8f, 3.0f, -20f, 3.3f, .65f, 2.8f, .32f, .20f, .12f)
         box(14f, .02f, -32f, 3.2f, .03f, 35f, .16f, .36f, .48f)
+
         for (i in -8..8) {
             val z = -4f - i * 4.2f
             box(-15f, 1.6f, z, .35f, 1.6f, .35f, .25f, .13f, .06f)
@@ -110,10 +166,35 @@ class GameRenderer : GLSurfaceView.Renderer {
             box(17f, 1.4f, z - 1.5f, .32f, 1.4f, .32f, .25f, .13f, .06f)
             ball(17f, 3.0f, z - 1.5f, 1.4f, 1.1f, 1.4f, .10f, .28f, .16f)
         }
+
         box(0f, .01f, 2f, 2.8f, .04f, 6f, .32f, .26f, .18f)
         for (i in -3..3) box(i * 1.8f, .35f, -3.5f, .35f, .7f, .35f, .15f, .34f, .18f)
+
+        // Pequenos marcos visuais para orientar o jogador até as três conversas.
+        beacon(-7f, -12f, .72f, .55f, .18f, .42f)
+        beacon(10f, -24f, .72f, .55f, .34f, .16f)
+        beacon(-5f, -30f, .72f, .25f, .48f, .68f)
+
+        npc(-7f, -12f, .55f, .42f, .24f)
+        npc(10f, -24f, .24f, .42f, .55f)
+        npc(-5f, -30f, .42f, .28f, .62f)
+
         val pulse = .8f + .2f * sin(t * 4f)
         box(4f, .65f, -1.8f, .22f, .75f * pulse, .22f, .20f, .65f, .95f)
+    }
+
+    private fun beacon(x: Float, z: Float, r: Float, g: Float, b: Float) {
+        val pulse = .8f + .2f * sin(t * 4f)
+        box(x, .35f, z, .08f, .35f * pulse, .08f, r, g, b)
+        ball(x, 1.0f * pulse, z, .16f, .16f, .16f, r, g, b)
+    }
+
+    private fun npc(x: Float, z: Float, r: Float, g: Float, b: Float) {
+        val bob = sin(t * 2f + x) * .015f
+        box(x, .95f + bob, z, .38f, .9f, .30f, r, g, b)
+        ball(x, 1.85f + bob, z, .30f, .34f, .30f, .72f, .56f, .40f)
+        box(x - .23f, .18f, z, .13f, .45f, .13f, r * .75f, g * .75f, b * .75f)
+        box(x + .23f, .18f, z, .13f, .45f, .13f, r * .75f, g * .75f, b * .75f)
     }
 
     private fun egg() {
@@ -133,43 +214,44 @@ class GameRenderer : GLSurfaceView.Renderer {
     }
 
     private fun hero() {
-        box(0f, 1.25f, .4f, .65f, 1.35f, .4f, .14f, .35f, .72f)
-        ball(0f, 2.35f, .4f, .4f, .48f, .4f, .48f, .32f, .22f)
-        box(-.5f, 1.15f, .4f, .18f, 1.1f, .18f, .12f, .25f, .55f)
-        box(.5f, 1.15f, .4f, .18f, 1.1f, .18f, .12f, .25f, .55f)
-        box(-.23f, .1f, .4f, .22f, .65f, .22f, .07f, .12f, .22f)
-        box(.23f, .1f, .4f, .22f, .65f, .22f, .07f, .12f, .22f)
+        box(px, 1.25f, pz, .65f, 1.35f, .4f, .14f, .35f, .72f)
+        ball(px, 2.35f, pz, .4f, .48f, .4f, .48f, .32f, .22f)
+        box(px - .5f, 1.15f, pz, .18f, 1.1f, .18f, .12f, .25f, .55f)
+        box(px + .5f, 1.15f, pz, .18f, 1.1f, .18f, .12f, .25f, .55f)
+        box(px - .23f, .1f, pz, .22f, .65f, .22f, .07f, .12f, .22f)
+        box(px + .23f, .1f, pz, .22f, .65f, .22f, .07f, .12f, .22f)
     }
 
     private fun mystica() {
         val s = when (form) { 0 -> 1f; 1 -> 1.3f; else -> 1.65f }
         val x = if (mysticaBonded) px + 1.7f else 1.55f
+        val z = if (mysticaBonded) pz - 1.8f else .25f
         val bob = sin(t * 3f) * .06f
-        ball(x, .72f * s + bob, .25f, .58f * s, .48f * s, .62f * s, .18f, .28f, .62f)
-        ball(x, 1.32f * s + bob, .25f, .46f * s, .43f * s, .46f * s, .28f, .42f, .78f)
-        ball(x, 1.28f * s + bob, .67f, .12f * s, .12f * s, .08f * s, .75f, .90f, 1f)
-        box(x - .30f * s, 1.72f * s + bob, .25f, .13f * s, .38f * s, .13f * s, .45f, .18f, .80f)
-        box(x + .28f * s, 1.78f * s + bob, .25f, .10f * s, .48f * s, .12f * s, .18f, .75f, .95f)
-        box(x - .38f * s, .25f, .22f, .16f * s, .48f * s, .16f * s, .12f, .20f, .48f)
-        box(x + .38f * s, .25f, .22f, .16f * s, .48f * s, .16f * s, .12f, .20f, .48f)
-        box(x - .36f * s, 1f * s + bob, .55f, .15f * s, .16f * s, .22f * s, .16f, .32f, .72f)
-        box(x + .36f * s, 1f * s + bob, .55f, .15f * s, .16f * s, .22f * s, .16f, .32f, .72f)
-        ball(x - .15f * s, 1.38f * s + bob, .66f, .055f * s, .055f * s, .035f * s, .98f, .98f, .78f)
-        ball(x + .15f * s, 1.38f * s + bob, .66f, .055f * s, .055f * s, .035f * s, .98f, .98f, .78f)
-        box(x + .62f * s, .85f * s + bob, .15f, .10f * s, .28f * s, .10f * s, .32f, .65f, .95f)
-        box(x + .82f * s, 1.05f * s + bob, .10f, .09f * s, .24f * s, .09f * s, .45f, .30f, .95f)
-        box(x + 1f * s, 1.25f * s + bob, .05f, .08f * s, .20f * s, .08f * s, .72f, .30f, .92f)
+        ball(x, .72f * s + bob, z, .58f * s, .48f * s, .62f * s, .18f, .28f, .62f)
+        ball(x, 1.32f * s + bob, z, .46f * s, .43f * s, .46f * s, .28f, .42f, .78f)
+        ball(x, 1.28f * s + bob, z + .42f, .12f * s, .12f * s, .08f * s, .75f, .90f, 1f)
+        box(x - .30f * s, 1.72f * s + bob, z, .13f * s, .38f * s, .13f * s, .45f, .18f, .80f)
+        box(x + .28f * s, 1.78f * s + bob, z, .10f * s, .48f * s, .12f * s, .18f, .75f, .95f)
+        box(x - .38f * s, .25f, z, .16f * s, .48f * s, .16f * s, .12f, .20f, .48f)
+        box(x + .38f * s, .25f, z, .16f * s, .48f * s, .16f * s, .12f, .20f, .48f)
+        box(x - .36f * s, 1f * s + bob, z + .30f, .15f * s, .16f * s, .22f * s, .16f, .32f, .72f)
+        box(x + .36f * s, 1f * s + bob, z + .30f, .15f * s, .16f * s, .22f * s, .16f, .32f, .72f)
+        ball(x - .15f * s, 1.38f * s + bob, z + .41f, .055f * s, .055f * s, .035f * s, .98f, .98f, .78f)
+        ball(x + .15f * s, 1.38f * s + bob, z + .41f, .055f * s, .055f * s, .035f * s, .98f, .98f, .78f)
+        box(x + .62f * s, .85f * s + bob, z - .10f, .10f * s, .28f * s, .10f * s, .32f, .65f, .95f)
+        box(x + .82f * s, 1.05f * s + bob, z - .15f, .09f * s, .24f * s, .09f * s, .45f, .30f, .95f)
+        box(x + 1f * s, 1.25f * s + bob, z - .20f, .08f * s, .20f * s, .08f * s, .72f, .30f, .92f)
         val hx = x - .70f * s
-        box(hx, .85f * s + bob, .55f, .07f * s, .68f * s, .07f * s, .30f, .16f, .08f)
-        box(hx, 1.22f * s + bob, .55f, .34f * s, .20f * s, .20f * s, .42f, .45f, .55f)
+        box(hx, .85f * s + bob, z + .30f, .07f * s, .68f * s, .07f * s, .30f, .16f, .08f)
+        box(hx, 1.22f * s + bob, z + .30f, .34f * s, .20f * s, .20f * s, .42f, .45f, .55f)
         if (form > 0) {
-            box(x - .62f * s, 1.40f * s + bob, .25f, .08f * s, .32f * s, .08f * s, .72f, .30f, .95f)
-            box(x + .62f * s, 1.40f * s + bob, .25f, .08f * s, .32f * s, .08f * s, .72f, .30f, .95f)
+            box(x - .62f * s, 1.40f * s + bob, z, .08f * s, .32f * s, .08f * s, .72f, .30f, .95f)
+            box(x + .62f * s, 1.40f * s + bob, z, .08f * s, .32f * s, .08f * s, .72f, .30f, .95f)
         }
         if (form == 2) {
-            box(x, 2.05f * s + bob, .25f, .10f * s, .55f * s, .10f * s, .82f, .48f, .95f)
-            box(x - .72f * s, 1.55f * s + bob, .20f, .08f * s, .38f * s, .08f * s, .20f, .70f, 1f)
-            box(x + .72f * s, 1.55f * s + bob, .20f, .08f * s, .38f * s, .08f * s, .20f, .70f, 1f)
+            box(x, 2.05f * s + bob, z, .10f * s, .55f * s, .10f * s, .82f, .48f, .95f)
+            box(x - .72f * s, 1.55f * s + bob, z - .05f, .08f * s, .38f * s, .08f * s, .20f, .70f, 1f)
+            box(x + .72f * s, 1.55f * s + bob, z - .05f, .08f * s, .38f * s, .08f * s, .20f, .70f, 1f)
         }
     }
 
