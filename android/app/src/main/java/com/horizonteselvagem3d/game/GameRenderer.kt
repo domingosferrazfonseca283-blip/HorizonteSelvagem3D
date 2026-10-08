@@ -31,8 +31,8 @@ class GameRenderer : GLSurfaceView.Renderer {
     private var eggCare = 0
     private var eggFound = false
     private var aurino = false
-    private var gltfPipelineReady = true
-    private var visualQuality = 2
+    private var gltfPipelineReady = false
+    private var visualQuality = 1
     private var mysticaBonded = false
     private var riverVisited = false
     private var mountainVisited = false
