@@ -471,6 +471,7 @@ class GameRenderer : GLSurfaceView.Renderer {
 
     private fun cow(x: Float, z: Float, s: Float) {
         val bob = sin(t * 1.5f + x) * .025f
+        val gait = sin(t * 4.0f + x) * .16f
         box(x, .92f + bob, z, .92f*s, .62f*s, .48f*s, .70f, .66f, .56f)
         ball(x + .85f*s, 1.18f + bob, z, .38f*s, .34f*s, .34f*s, .70f, .66f, .56f)
         ball(x + 1.16f*s, 1.12f + bob, z - .15f*s, .06f*s, .05f*s, .05f*s, .22f, .18f, .16f)
@@ -479,13 +480,14 @@ class GameRenderer : GLSurfaceView.Renderer {
         box(x + .68f*s, 1.46f + bob, z - .25f*s, .10f*s, .20f*s, .08f*s, .16f, .10f, .07f)
         box(x + .68f*s, 1.46f + bob, z + .25f*s, .10f*s, .20f*s, .08f*s, .16f, .10f, .07f)
         for (i in -1..1 step 2) {
-            cylinder(x + .52f*s, .35f, z + i*.25f*s, .11f*s, .62f*s, .11f*s, .28f, .24f, .20f)
-            cylinder(x - .55f*s, .35f, z + i*.25f*s, .11f*s, .62f*s, .11f*s, .28f, .24f, .20f)
+            cylinder(x + .52f*s, .35f + gait * i * s, z + i*.25f*s, .11f*s, .62f*s, .11f*s, .28f, .24f, .20f)
+            cylinder(x - .55f*s, .35f - gait * i * s, z + i*.25f*s, .11f*s, .62f*s, .11f*s, .28f, .24f, .20f)
         }
     }
 
     private fun horse(x: Float, z: Float, s: Float) {
         val bob = sin(t * 1.8f + z) * .025f
+        val gait = sin(t * 4.4f + z) * .18f
         box(x, 1.18f + bob, z, 1.05f*s, .70f*s, .38f*s, .34f, .22f, .12f)
         cylinder(x + .82f*s, 1.58f + bob, z, .24f*s, .95f*s, .24f*s, .38f, .25f, .14f)
         ball(x + 1.00f*s, 2.15f + bob, z, .34f*s, .28f*s, .28f*s, .38f, .25f, .14f)
@@ -494,8 +496,8 @@ class GameRenderer : GLSurfaceView.Renderer {
         box(x + 1.16f*s, 2.28f + bob, z - .14f*s, .08f*s, .22f*s, .08f*s, .18f, .12f, .08f)
         box(x + 1.16f*s, 2.28f + bob, z + .14f*s, .08f*s, .22f*s, .08f*s, .18f, .12f, .08f)
         for (i in -1..1 step 2) {
-            cylinder(x + .62f*s, .43f, z + i*.20f*s, .10f*s, .88f*s, .10f*s, .22f, .14f, .09f)
-            cylinder(x - .62f*s, .43f, z + i*.20f*s, .10f*s, .88f*s, .10f*s, .22f, .14f, .09f)
+            cylinder(x + .62f*s, .43f + gait * i * s, z + i*.20f*s, .10f*s, .88f*s, .10f*s, .22f, .14f, .09f)
+            cylinder(x - .62f*s, .43f - gait * i * s, z + i*.20f*s, .10f*s, .88f*s, .10f*s, .22f, .14f, .09f)
         }
         cylinder(x - 1.0f*s, 1.18f + bob, z, .08f*s, .72f*s, .08f*s, .30f, .16f, .09f)
     }
