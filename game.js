@@ -58,6 +58,53 @@ function createPath(){
 }
 createPath();
 
+function box(w,h,d,color,x,y,z){
+  const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat(color));
+  m.position.set(x,y,z);m.castShadow=true;m.receiveShadow=true;scene.add(m);return m;
+}
+function ruralHouse(x,z,scale=1){
+  const g=new THREE.Group();
+  const wall=mat(0xb9a17d),roof=mat(0x5b3f31),wood=mat(0x684936);
+  const base=new THREE.Mesh(new THREE.BoxGeometry(5*scale,3*scale,4*scale),wall);base.position.y=1.5*scale;g.add(base);
+  const roofMesh=new THREE.Mesh(new THREE.ConeGeometry(3.8*scale,2.2*scale,4),roof);roofMesh.position.y=4*scale;roofMesh.rotation.y=Math.PI/4;g.add(roofMesh);
+  const door=new THREE.Mesh(new THREE.BoxGeometry(.9*scale,1.7*scale,.12*scale),wood);door.position.set(0,.85*scale,2.06*scale);g.add(door);
+  for(const dx of [-1.55,1.55]){const win=new THREE.Mesh(new THREE.BoxGeometry(.9*scale,.8*scale,.1*scale),mat(0x9bc3c0));win.position.set(dx,1.7*scale,2.06*scale);g.add(win)}
+  g.position.set(x,0,z);scene.add(g);
+}
+function barn(x,z){
+  ruralHouse(x,z,1.35);
+  box(2.8,2.2,.16,0x593b2a,x,1.1,z+2.85);
+}
+function fence(x,z,len=12){
+  for(let i=0;i<=len;i+=2){box(.12,1.1,.12,0x76543a,x-len/2+i,.55,z);box(.12,1.1,.12,0x76543a,x-len/2+i,.55,z+1.1)}
+}
+function addRuralVillage(){
+  ruralHouse(-10,-30,.9);ruralHouse(8,-35,1.05);ruralHouse(20,-27,.8);barn(-24,-34);
+  fence(-13,-24,16);fence(10,-25,14);
+  for(let i=0;i<8;i++){const x=-7+i*2;const crop=box(.35,.45,.35,0x6f7e46,x,.22,-22);crop.rotation.z=(i%2?.15:-.15)}
+  const well= new THREE.Mesh(new THREE.CylinderGeometry(1.2,1.35,.8,12),mat(0x77736b));well.position.set(1,.4,-27);scene.add(well);
+  const post=box(.18,2.5,.18,0x5b4330,1,1.8,-27);const beam=box(2.2,.18,.18,0x5b4330,1,2.8,-27);
+  const water=new THREE.Mesh(new THREE.CylinderGeometry(.85,.85,.08,16),mat(0x4e7f89));water.position.set(1,.84,-27);scene.add(water);
+}
+addRuralVillage();
+
+function createRiver(){
+  const river=new THREE.Mesh(new THREE.PlaneGeometry(10,115),new THREE.MeshStandardMaterial({color:0x416f78,roughness:.25,transparent:true,opacity:.78}));
+  river.rotation.x=-Math.PI/2;river.position.set(27,.025,-48);scene.add(river);
+  for(let i=0;i<7;i++){const bridge=box(12,.35,2.4,0x674a32,27,.3,-15-i*16);bridge.rotation.y=0;}
+}
+createRiver();
+
+function npc(x,z,name){
+  const n=human(0x7a5a3c);n.position.set(x,0,z);n.userData={npc:true,name,phase:Math.random()*5};
+  scene.add(n);return n;
+}
+const villagers=[
+ npc(-3,-28,'Dona Rosa'),
+ npc(15,-31,'Mateus'),
+ npc(-18,-25,'Joana')
+];
+
 function human(color=0x314c67){
   const g=new THREE.Group(),skin=mat(0xc58f70),cloth=mat(color);
   const body=new THREE.Mesh(new THREE.CapsuleGeometry(.38,.9,6,10),cloth);body.position.y=1.25;body.castShadow=true;g.add(body);
@@ -69,6 +116,12 @@ function human(color=0x314c67){
   return g;
 }
 const playerEcho=human(0x3e6076);playerEcho.position.set(0,0,-3);playerEcho.rotation.y=Math.PI;scene.add(playerEcho);
+
+function addVillageSign(){
+  const sign=box(2.6,1.1,.18,0x6b4a31,0,1.7,-18);
+  const post1=box(.14,2,.14,0x5b4330,-.9,.9,-18),post2=box(.14,2,.14,0x5b4330,.9,.9,-18);
+}
+addVillageSign();
 
 function creature(x,z,name,kind){
   const g=new THREE.Group(),c=mat(kind===0?0x7d8068:kind===1?0x806d4e:0x666d6b),dark=mat(0x343c31);
@@ -164,6 +217,10 @@ addEventListener('keydown',e=>{
   keys[e.code]=true;
   if(e.code==='KeyE')interact();
   if(e.code==='KeyF')startCombat();
+  if(e.code==='KeyQ'){
+    const n=villagers.reduce((best,v)=>{const d=v.position.distanceTo(camera.position);return d<(best?.d??99)?{v,d}:best},null);
+    if(n&&n.d<7){$('dialogText').textContent=n.v.userData.name+': “As criaturas fazem parte da nossa terra. Se quiser conhecê-las, caminhe com respeito.”';$('dialog').classList.remove('hidden');$('dialogBtn').onclick=()=>{$('dialog').classList.add('hidden');gainXp(15);setMission('Converse com os moradores e descubra os caminhos da região.');save()}}
+  }
   if(e.code==='Escape'&&gameStarted){$('menu').classList.toggle('hidden')}
 });
 addEventListener('keyup',e=>keys[e.code]=false);
