@@ -69,6 +69,7 @@ class GameRenderer : GLSurfaceView.Renderer {
         world()
         hero()
         farmAnimals()
+        vegetation()
         mystica()
         if (eggFound && !aurino) egg()
         if (aurino) aurino()
@@ -459,6 +460,31 @@ class GameRenderer : GLSurfaceView.Renderer {
         cylinder(px + .22f, .38f, pz, .17f, .72f, .17f, .07f, .11f, .20f)
         box(px - .22f, .04f, pz + .08f, .22f, .08f, .38f, .045f, .06f, .07f)
         box(px + .22f, .04f, pz + .08f, .22f, .08f, .38f, .045f, .06f, .07f)
+    }
+
+    private fun vegetation() {
+        val wind = sin(t * 1.4f) * .035f
+        val trees = arrayOf(
+            floatArrayOf(-18f, -12f, 1.25f),
+            floatArrayOf(18f, -20f, 1.45f),
+            floatArrayOf(-20f, -33f, 1.55f),
+            floatArrayOf(20f, -44f, 1.2f),
+            floatArrayOf(-8f, -55f, 1.7f)
+        )
+        for (tree in trees) {
+            val x = tree[0]
+            val z = tree[1]
+            val s = tree[2]
+            cylinder(x, 1.7f, z, .22f*s, 1.8f*s, .22f*s, .28f, .18f, .08f)
+            sphere(x + wind*s, 3.45f*s, z, 1.15f*s, 1.35f*s, 1.15f*s, .16f, .36f, .14f)
+            sphere(x - .55f*s + wind*s, 3.0f*s, z + .25f*s, .75f*s, .9f*s, .75f*s, .18f, .42f, .16f)
+            sphere(x + .55f*s + wind*s, 3.0f*s, z - .2f*s, .72f*s, .85f*s, .72f*s, .14f, .32f, .12f)
+        }
+        for (i in 0..9) {
+            val x = -18f + i * 3.8f
+            val z = -8f - (i % 5) * 8f
+            sphere(x + sin(t + i) * .03f, .22f, z, .34f, .28f, .34f, .20f, .38f, .12f)
+        }
     }
 
     private fun farmAnimals() {
