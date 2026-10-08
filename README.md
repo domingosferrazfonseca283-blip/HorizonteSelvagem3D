@@ -35,3 +35,22 @@ Depois visite `http://localhost:8080`.
 ## Próxima fase de produção
 
 Para transformar o protótipo em um jogo comercial completo: substituir os meshes procedurais por modelos 3D licenciados/originais, adicionar animações e captura facial, áudio, inventário, árvores de habilidades, mapas por bioma, save/cloud, NPCs, quests, multiplayer opcional e pipeline de build para Android/Windows/Web.
+
+## Jogar online
+
+O jogo web é publicado automaticamente pelo GitHub Actions em cada alteração no branch `master`.
+
+**Página do jogo:** https://domingosferrazfonseca283-blip.github.io/HorizonteSelvagem3D/
+
+### Controles
+- **WASD** — mover
+- **SHIFT** — correr
+- **Mouse** — olhar
+- **ESPAÇO** — saltar
+- **E** — interagir com criaturas próximas
+- **F** — iniciar encontro
+- **PULSO** — reduzir a vida da criatura
+- **GUARDAR** — recuperar energia
+- **VÍNCULO** — estabelecer vínculo quando a criatura estiver enfraquecida
+
+> Na primeira publicação, pode ser necessário ativar **Settings → Pages** e selecionar **GitHub Actions** como fonte de publicação.
