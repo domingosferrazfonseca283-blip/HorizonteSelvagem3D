@@ -9,6 +9,4 @@ kotlin { jvmToolchain(17) }
 
 dependencies {
     // Renderer PBR moderno e carregamento de modelos glTF/GLB.
-    implementation("com.google.android.filament:filament-android:1.50.6")
-    implementation("com.google.android.filament:gltfio-android:1.50.6")
-}
+        }
