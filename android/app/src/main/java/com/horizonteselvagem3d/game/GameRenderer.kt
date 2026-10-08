@@ -462,15 +462,17 @@ class GameRenderer : GLSurfaceView.Renderer {
     }
 
     private fun farmAnimals() {
-        // Animais reais do cenário rural: modelos simples, mas com proporções reconhecíveis.
-        cow(-13f, -18f, 1f)
-        cow(13f, -27f, 1.08f)
-        horse(-11f, -42f, .95f)
-        horse(14f, -50f, 1.05f)
-        dog(-6f, -22f, .72f)
-        dog(7f, -34f, .68f)
-        bird(-2f, -16f, 4.5f)
-        bird(10f, -39f, 5.2f)
+        // Fauna rural com deslocamento ambiental suave.
+        val wander = sin(t * .32f)
+        val drift = cos(t * .27f)
+        cow(-13f + wander * 1.8f, -18f + drift * 1.2f, 1f)
+        cow(13f + drift * 1.5f, -27f + wander * 1.1f, 1.08f)
+        horse(-11f + drift * 2.0f, -42f + wander * 1.4f, .95f)
+        horse(14f + wander * 1.7f, -50f + drift * 1.5f, 1.05f)
+        dog(-6f + sin(t * .7f) * 2.2f, -22f + cos(t * .55f) * 1.5f, .72f)
+        dog(7f + cos(t * .62f) * 1.8f, -34f + sin(t * .48f) * 1.4f, .68f)
+        bird(-2f + sin(t * .45f) * 5f, -16f + cos(t * .38f) * 3f, 4.5f + sin(t * .8f) * .5f)
+        bird(10f + cos(t * .4f) * 4f, -39f + sin(t * .35f) * 3f, 5.2f + cos(t * .75f) * .6f)
     }
 
     private fun dog(x: Float, z: Float, s: Float) {
