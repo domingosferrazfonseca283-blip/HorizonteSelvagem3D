@@ -207,9 +207,9 @@ class GameRenderer : GLSurfaceView.Renderer {
         for (i in -3..3) box(i * 1.8f, .35f, -3.5f, .35f, .7f, .35f, .15f, .34f, .18f)
 
         // Pequenos marcos visuais para orientar o jogador até as três conversas.
-        beacon(-7f, -12f, .72f, .55f, .18f, .42f)
-        beacon(10f, -24f, .72f, .55f, .34f, .16f)
-        beacon(-5f, -30f, .72f, .25f, .48f, .68f)
+        beacon(-7f, -12f, .72f, .55f, .18f)
+        beacon(10f, -24f, .72f, .55f, .34f)
+        beacon(-5f, -30f, .72f, .25f, .48f)
 
         npc(-7f, -12f, .55f, .42f, .24f)
         npc(10f, -24f, .24f, .42f, .55f)
