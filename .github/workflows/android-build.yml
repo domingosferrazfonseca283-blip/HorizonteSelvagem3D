@@ -31,16 +31,18 @@ jobs:
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: HorizonteSelvagem3D-debug
+          name: HorizonteSelvagem3D-debug-v0.4.0
           path: android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
       - name: Publish public GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v0.1.0-build.${{ github.run_number }}
-          name: Horizonte Selvagem 3D v0.1.0-build.${{ github.run_number }}
+          tag_name: v0.4.0-build.${{ github.run_number }}
+          name: Horizonte Selvagem 3D v0.4.0-build.${{ github.run_number }}
           body: |
             APK de teste do Horizonte Selvagem 3D.
+
+            Esta versão inclui NPCs rurais, conversas, progressão persistente e a sequência Mística → ovo → Aurino.
 
             Esta versão é gerada automaticamente a partir do branch main.
           files: android/app/build/outputs/apk/debug/app-debug.apk
