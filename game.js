@@ -76,7 +76,7 @@ function creature(x,z,name,kind){
   const head=new THREE.Mesh(new THREE.SphereGeometry(.62,14,10),c);head.position.set(0,1.35,.95);g.add(head);
   for(const x2 of [-.55,.55])for(const z2 of [-.5,.5]){const l=new THREE.Mesh(new THREE.CapsuleGeometry(.1,.65,4,6),dark);l.position.set(x2,.55,z2);g.add(l)}
   g.position.set(x,0,z);
-  g.userData={hp:100,maxHp:100,name,alive:true,phase:Math.random()*6,kind,bonded:false};
+  g.userData={hp:100,maxHp:100,name,alive:true,phase:Math.random()*6,kind,bonded:false,trust:kind==='mistica'?20:0};
   scene.add(g);creatures.push(g);
 }
 creature(5,-10,'Mística','mistica');
@@ -100,7 +100,7 @@ function load(){
   }catch{return false}
 }
 function updateHud(){
-  $('xp').textContent=xp;$('level').textContent=level;$('energy').textContent=Math.round(energy);$('bond').textContent=Math.round(bond);
+  $('xp').textContent=xp;$('level').textContent=level;$('energy').textContent=Math.round(energy);$('bond').textContent=Math.round(bond);if($('trust'))$('trust').textContent=Math.round(creatures[0]?.userData.trust||0);
   const x=Math.round(camera.position.x),z=Math.round(-camera.position.z);$('coords').textContent=`${x}, ${z}`;
 }
 function setMission(text){$('mission').textContent=text}
@@ -128,10 +128,10 @@ function interact(){
   if(c){
     target=c;
     if(c.userData.name==='Mística'&&!c.userData.bonded)
-      $('dialogText').textContent='Uma criatura desconhecida surge entre as árvores. Ela não ataca. Um núcleo de energia azul pulsa no peito dela, respondendo ao seu equipamento.';
+      $('dialogText').textContent='Mística observa Kael sem atacar. A confiança será construída com tempo, cuidado e experiências compartilhadas.';
     else $('dialogText').textContent=`${c.userData.name} observa você. A energia do ambiente parece alterar o comportamento da criatura.`;
     $('dialog').classList.remove('hidden');
-    $('dialogBtn').onclick=()=>{$('dialog').classList.add('hidden');startCombat()};
+    $('dialogBtn').onclick=()=>{$('dialog').classList.add('hidden');c.userData.bonded=true;c.userData.trust=Math.min(100,(c.userData.trust||0)+15);bond=Math.min(100,bond+10);gainXp(25);setMission(c.userData.name+' está começando a confiar em você. Continue explorando juntos.');updateHud();save()};
   }else setMission('Nenhum sinal próximo. Siga pelo caminho e explore o vale.');
 }
 function startCombat(){
@@ -145,7 +145,7 @@ function gainXp(amount){
 }
 function action(a){
   if(!combat||!target)return;
-  if(a==='guard'){energy=Math.min(100,energy+10);setMission('Você estabilizou sua energia.')}
+  if(a==='guard'){energy=Math.min(100,energy+10);if(target?.userData)target.userData.trust=Math.min(100,(target.userData.trust||0)+5);setMission('Você cuidou da criatura e recuperou energia.')}
   else if(a==='pulse'){
     const dmg=18+Math.random()*16;target.userData.hp=Math.max(0,target.userData.hp-dmg);energy=Math.max(0,energy-8);
     setMission('Pulso emitido. A criatura está ficando mais calma.');
