@@ -2,59 +2,66 @@
 
 ## O Primeiro Horizonte
 
-Kael deixa a cidade e viaja para uma região rural isolada. Seu objetivo inicial é investigar uma pergunta que pesquisadores discutem há anos: existe uma ligação verdadeira entre criaturas e seres humanos?
+Kael deixa a cidade e chega a uma região rural isolada para investigar a ligação entre seres humanos e criaturas.
 
-Na região, ele descobre que a convivência é mais importante que a força. Agricultores conhecem os hábitos das criaturas, moradores ajudam animais perdidos e algumas criaturas escolhem ficar perto de determinadas pessoas.
+A primeira comunidade que encontra vive entre campos, uma pequena floresta e um rio. Os moradores conhecem as criaturas há gerações e não as tratam apenas como adversários.
 
-Kael começa a explorar estradas de terra, fazendas, rios e florestas. Aos poucos, percebe que não quer apenas estudar as criaturas. Quer aprender a construir um vínculo com uma delas.
+Kael começa a perceber que cada pessoa possui uma relação diferente com a natureza.
+
+### Dona Rosa
+
+Dona Rosa conta que as criaturas costumavam aparecer perto do rio, mas recentemente ficaram inquietas.
+
+Ela pede que Kael investigue a região.
+
+### Mateus
+
+Mateus trabalha próximo às plantações e diz ter visto uma luz azul perto das montanhas.
+
+Ele acredita que a luz está relacionada aos acontecimentos recentes.
+
+### Joana
+
+Joana conhece as antigas histórias da comunidade. Ela percebe rapidamente que Mística confia em Kael.
+
+Ela explica que confiança não pode ser forçada.
 
 ## Mística
 
-Durante uma exploração, Kael encontra uma pequena criatura misteriosa. Ela não o ataca. Apenas observa.
+Kael encontra Mística durante sua exploração.
 
-Kael não tenta capturá-la. Ele permanece por perto, aprende seus sinais e ajuda quando necessário.
+Em vez de tentar dominá-la, decide permanecer próximo e aprender seus comportamentos.
 
-Com o tempo, a confiança cresce e a criatura aceita acompanhá-lo. Kael dá a ela o nome **Mística**.
+Cada experiência compartilhada aumenta a confiança.
 
-O primeiro vínculo ensina a Kael que lealdade não é uma recompensa automática: é algo construído através de experiências compartilhadas.
+Mística começa a acompanhar Kael pela região.
 
 ## O ovo
 
-Em uma trilha afastada, Kael encontra um ovo estranho. Ele percebe que o ovo reage à sua presença e decide protegê-lo em vez de tratá-lo como objeto de pesquisa.
+Durante uma exploração, Kael encontra um ovo misterioso.
 
-O ovo passa a fazer parte da jornada.
+Ele decide protegê-lo e investigar sua origem.
 
-Kael precisa cuidar dele, explorar a região e descobrir sua origem. O nascimento da criatura será resultado de uma jornada, e não apenas de uma ação de combate.
+O ovo passa a fazer parte da jornada, criando um novo compromisso para Kael.
 
-A criatura que nascerá será completamente original, com aparência mística, personalidade própria e uma ferramenta característica que poderá usar de maneira criativa. A ideia pode ter o arquétipo de uma pequena criatura fantástica habilidosa, mas não copiar personagens ou criaturas de outras franquias.
+## Exploração
 
-## O verdadeiro objetivo
+Ao investigar o rio, Kael encontra sinais de que as criaturas estão evitando determinadas áreas.
 
-*Horizonte Selvagem 3D* não é apenas um jogo de batalhas.
+Seguindo a estrada rural, ele também encontra marcas de energia azul apontando para as montanhas.
 
-A experiência é construída em torno de:
-
-- **Ligação:** conhecer e compreender as criaturas.
-- **Compromisso:** cuidar delas durante a jornada.
-- **Lealdade:** conquistar confiança através das experiências.
-- **Aventura:** viver acontecimentos inesperados.
-- **Exploração:** descobrir trilhas, fazendas, rios, florestas e lugares escondidos.
-- **História:** descobrir por que humanos e criaturas estão ligados.
-
-As batalhas existirão quando fizerem sentido, mas serão apenas uma parte da aventura.
+Essas descobertas conectam as histórias dos moradores com o mistério que trouxe Kael para a região.
 
 ## Final do capítulo
 
-Depois de estabelecer seu primeiro vínculo e encontrar o ovo, Kael percebe uma luz surgindo atrás das montanhas.
+Ao chegar ao limite da estrada, Kael vê uma luz azul surgir atrás das montanhas.
 
 Mística reage imediatamente.
 
-O ovo também começa a emitir uma pequena luz.
+O ovo também responde com um brilho fraco.
 
-Os dois sinais parecem estar conectados.
+Kael entende que os acontecimentos da comunidade, Mística e o ovo provavelmente fazem parte do mesmo fenômeno.
 
-Kael decide seguir a estrada rural em direção às montanhas.
-
-A próxima descoberta pode revelar que a ligação entre humanos e criaturas é muito mais antiga do que todos imaginavam.
+Ele decide continuar a jornada.
 
 **Fim do Capítulo 1.**
