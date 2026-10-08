@@ -489,6 +489,8 @@ class GameRenderer : GLSurfaceView.Renderer {
         box(x, 1.18f + bob, z, 1.05f*s, .70f*s, .38f*s, .34f, .22f, .12f)
         cylinder(x + .82f*s, 1.58f + bob, z, .24f*s, .95f*s, .24f*s, .38f, .25f, .14f)
         ball(x + 1.00f*s, 2.15f + bob, z, .34f*s, .28f*s, .28f*s, .38f, .25f, .14f)
+        ball(x + 1.25f*s, 2.08f + bob, z - .10f*s, .045f*s, .04f*s, .035f*s, .055f, .045f, .035f)
+        ball(x + 1.25f*s, 2.08f + bob, z + .10f*s, .045f*s, .04f*s, .035f*s, .055f, .045f, .035f)
         box(x + 1.16f*s, 2.28f + bob, z - .14f*s, .08f*s, .22f*s, .08f*s, .18f, .12f, .08f)
         box(x + 1.16f*s, 2.28f + bob, z + .14f*s, .08f*s, .22f*s, .08f*s, .18f, .12f, .08f)
         for (i in -1..1 step 2) {
