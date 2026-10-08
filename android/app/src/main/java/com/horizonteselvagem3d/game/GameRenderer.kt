@@ -70,6 +70,7 @@ class GameRenderer : GLSurfaceView.Renderer {
         hero()
         farmAnimals()
         vegetation()
+        environmentDetails()
         mystica()
         if (eggFound && !aurino) egg()
         if (aurino) aurino()
@@ -460,6 +461,29 @@ class GameRenderer : GLSurfaceView.Renderer {
         cylinder(px + .22f, .38f, pz, .17f, .72f, .17f, .07f, .11f, .20f)
         box(px - .22f, .04f, pz + .08f, .22f, .08f, .38f, .045f, .06f, .07f)
         box(px + .22f, .04f, pz + .08f, .22f, .08f, .38f, .045f, .06f, .07f)
+    }
+
+    private fun environmentDetails() {
+        // Pedras, cercas e pequenos elementos rurais para dar escala e profundidade ao mapa.
+        val posts = arrayOf(
+            floatArrayOf(-16f, -8f), floatArrayOf(-13f, -8f), floatArrayOf(-10f, -8f),
+            floatArrayOf(12f, -15f), floatArrayOf(15f, -15f), floatArrayOf(18f, -15f)
+        )
+        for (p in posts) {
+            cylinder(p[0], .75f, p[1], .09f, .75f, .09f, .34f, .23f, .11f)
+        }
+        box(-13f, 1.05f, -8f, 3.1f, .07f, .07f, .42f, .29f, .14f)
+        box(15f, 1.05f, -15f, 3.1f, .07f, .07f, .42f, .29f, .14f)
+
+        val rocks = arrayOf(
+            floatArrayOf(-7f, -14f, .55f),
+            floatArrayOf(9f, -25f, .75f),
+            floatArrayOf(-15f, -38f, .9f),
+            floatArrayOf(11f, -48f, .5f)
+        )
+        for (r in rocks) {
+            sphere(r[0], r[2] * .45f, r[1], r[2], r[2] * .55f, r[2] * .8f, .30f, .30f, .28f)
+        }
     }
 
     private fun vegetation() {
