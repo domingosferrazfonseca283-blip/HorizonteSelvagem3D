@@ -415,11 +415,14 @@ class GameRenderer : GLSurfaceView.Renderer {
     }
 
     private fun npc(x: Float, z: Float, r: Float, g: Float, b: Float) {
-        val bob = sin(t * 2f + x) * .015f
-        box(x, .95f + bob, z, .38f, .9f, .30f, r, g, b)
-        ball(x, 1.85f + bob, z, .30f, .34f, .30f, .72f, .56f, .40f)
-        box(x - .23f, .18f, z, .13f, .45f, .13f, r * .75f, g * .75f, b * .75f)
-        box(x + .23f, .18f, z, .13f, .45f, .13f, r * .75f, g * .75f, b * .75f)
+        val bob = sin(t * 2f + x) * .02f
+        cylinder(x, 1.15f + bob, z, .40f, 1.05f, .28f, r, g, b)
+        cylinder(x, 1.78f + bob, z, .14f, .22f, .14f, .74f, .57f, .42f)
+        ball(x, 2.18f + bob, z, .30f, .36f, .28f, .68f, .52f, .38f)
+        cylinder(x - .48f, 1.18f + bob, z, .11f, .88f, .11f, r * .78f, g * .78f, b * .78f)
+        cylinder(x + .48f, 1.18f - bob, z, .11f, .88f, .11f, r * .78f, g * .78f, b * .78f)
+        cylinder(x - .17f, .42f, z, .14f, .72f, .14f, .12f, .14f, .16f)
+        cylinder(x + .17f, .42f, z, .14f, .72f, .14f, .12f, .14f, .16f)
     }
 
     private fun egg() {
