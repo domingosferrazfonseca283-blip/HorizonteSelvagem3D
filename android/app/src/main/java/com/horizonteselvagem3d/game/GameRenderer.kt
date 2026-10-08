@@ -473,6 +473,8 @@ class GameRenderer : GLSurfaceView.Renderer {
         val bob = sin(t * 1.5f + x) * .025f
         box(x, .92f + bob, z, .92f*s, .62f*s, .48f*s, .70f, .66f, .56f)
         ball(x + .85f*s, 1.18f + bob, z, .38f*s, .34f*s, .34f*s, .70f, .66f, .56f)
+        ball(x + 1.16f*s, 1.12f + bob, z - .15f*s, .06f*s, .05f*s, .05f*s, .22f, .18f, .16f)
+        ball(x + 1.16f*s, 1.12f + bob, z + .15f*s, .06f*s, .05f*s, .05f*s, .22f, .18f, .16f)
         box(x + 1.15f*s, 1.20f + bob, z, .10f*s, .08f*s, .22f*s, .16f, .10f, .07f)
         box(x + .68f*s, 1.46f + bob, z - .25f*s, .10f*s, .20f*s, .08f*s, .16f, .10f, .07f)
         box(x + .68f*s, 1.46f + bob, z + .25f*s, .10f*s, .20f*s, .08f*s, .16f, .10f, .07f)
