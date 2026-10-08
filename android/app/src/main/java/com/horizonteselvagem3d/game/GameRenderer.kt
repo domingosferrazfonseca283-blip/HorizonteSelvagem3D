@@ -39,6 +39,9 @@ class GameRenderer : GLSurfaceView.Renderer {
     private var springVisited = false
     private var lumeaMet = false
     private var lumeaBonded = false
+    private var chapter3Stage = 0
+    private var blueFragments = 0
+    private var waterValleyVisited = false
     private var mission = "Explore o vale rural e encontre Mística."
 
     override fun onSurfaceCreated(gl: GL10?, c: EGLConfig?) {
@@ -75,8 +78,13 @@ class GameRenderer : GLSurfaceView.Renderer {
             mission = "Capítulo 2: atravesse a passagem azul e explore os Campos Vermelhos."
             return
         }
-        if (chapter2Stage >= 5) {
-            mission = "Capítulo 2 concluído. Uma nova trilha se abre além dos campos."
+        if (chapter2Stage >= 5 && chapter3Stage == 0) {
+            chapter3Stage = 1
+            mission = "Capítulo 3: entre no Vale das Águas e procure os Fragmentos de Horizonte."
+            return
+        }
+        if (chapter3Stage >= 4) {
+            mission = "Capítulo 3 concluído. O caminho para a Serra do Horizonte foi revelado."
             return
         }
 
@@ -85,6 +93,39 @@ class GameRenderer : GLSurfaceView.Renderer {
         val springDistance = distance(px, pz, -4f, -108f)
         val lumeaDistance = distance(px, pz, 10f, -92f)
         val mysticaDistance = distance(px, pz, 1.55f, 0f)
+        val waterValleyDistance = distance(px, pz, 0f, -130f)
+        val fragment1Distance = distance(px, pz, -10f, -136f)
+        val fragment2Distance = distance(px, pz, 9f, -142f)
+        val fragment3Distance = distance(px, pz, -6f, -150f)
+        val shrineDistance = distance(px, pz, 4f, -154f)
+
+        if (chapter3Stage >= 1 && chapter3Stage < 4) {
+            if (!waterValleyVisited && waterValleyDistance < 9f) {
+                waterValleyVisited = true
+                mission = "O Vale das Águas guarda três fragmentos. Explore as margens."
+                return
+            }
+            if (waterValleyVisited && blueFragments < 1 && fragment1Distance < 6f) {
+                blueFragments = 1
+                mission = "Fragmento de Horizonte encontrado: 1/3."
+                return
+            }
+            if (blueFragments == 1 && fragment2Distance < 6f) {
+                blueFragments = 2
+                mission = "Segundo Fragmento de Horizonte encontrado: 2/3."
+                return
+            }
+            if (blueFragments == 2 && fragment3Distance < 6f) {
+                blueFragments = 3
+                mission = "Terceiro Fragmento de Horizonte encontrado: 3/3. Volte ao santuário."
+                return
+            }
+            if (blueFragments >= 3 && shrineDistance < 7f) {
+                chapter3Stage = 4
+                mission = "Os três fragmentos ativaram o santuário. Capítulo 3 concluído."
+                return
+            }
+        }
 
         if (chapter2Stage >= 1 && chapter2Stage < 5) {
             if (oldMillDistance < 6f && chapter2Stage == 1) {
@@ -170,7 +211,7 @@ class GameRenderer : GLSurfaceView.Renderer {
 
     fun move(dx: Float, dz: Float) {
         px = (px + dx).coerceIn(-18f, 18f)
-        pz = (pz + dz).coerceIn(-118f, 18f)
+        pz = (pz + dz).coerceIn(-158f, 18f)
 
         if (mysticaBonded && missionStage == 1 && distance(px, pz, 14f, -32f) < 7f) {
             riverVisited = true
@@ -197,6 +238,21 @@ class GameRenderer : GLSurfaceView.Renderer {
         if (chapter2Stage == 4 && distance(px, pz, -4f, -108f) < 7f) {
             mission = "A nascente está diante de você. Use AÇÃO."
         }
+        if (chapter3Stage == 1 && distance(px, pz, 0f, -130f) < 9f) {
+            mission = "O Vale das Águas começa aqui. Use AÇÃO para investigar."
+        }
+        if (chapter3Stage >= 1 && blueFragments < 1 && distance(px, pz, -10f, -136f) < 6f) {
+            mission = "Há um brilho entre as pedras. Use AÇÃO para coletar o fragmento."
+        }
+        if (chapter3Stage >= 1 && blueFragments == 1 && distance(px, pz, 9f, -142f) < 6f) {
+            mission = "Outro fragmento está perto da margem. Use AÇÃO."
+        }
+        if (chapter3Stage >= 1 && blueFragments == 2 && distance(px, pz, -6f, -150f) < 6f) {
+            mission = "O último fragmento está diante de você. Use AÇÃO."
+        }
+        if (blueFragments >= 3 && distance(px, pz, 4f, -154f) < 7f) {
+            mission = "O santuário está pronto. Use AÇÃO."
+        }
 
         if (missionStage >= 3 && !eggFound && distance(px, pz, 7f, -35f) < 5f) {
             mission = "Há algo escondido aqui. Use AÇÃO para investigar."
@@ -216,6 +272,9 @@ class GameRenderer : GLSurfaceView.Renderer {
             .putBoolean("springVisited", springVisited)
             .putBoolean("lumeaMet", lumeaMet)
             .putBoolean("lumeaBonded", lumeaBonded)
+            .putInt("chapter3Stage", chapter3Stage)
+            .putInt("blueFragments", blueFragments)
+            .putBoolean("waterValleyVisited", waterValleyVisited)
             .apply()
     }
 
@@ -232,7 +291,12 @@ class GameRenderer : GLSurfaceView.Renderer {
         springVisited = prefs.getBoolean("springVisited", false)
         lumeaMet = prefs.getBoolean("lumeaMet", false)
         lumeaBonded = prefs.getBoolean("lumeaBonded", false)
+        chapter3Stage = prefs.getInt("chapter3Stage", 0)
+        blueFragments = prefs.getInt("blueFragments", 0)
+        waterValleyVisited = prefs.getBoolean("waterValleyVisited", false)
         mission = when {
+            chapter3Stage >= 4 -> "Capítulo 3 concluído. O caminho para a Serra do Horizonte foi revelado."
+            chapter3Stage >= 1 -> "Capítulo 3: Fragmentos de Horizonte $blueFragments/3."
             chapter2Stage >= 5 -> "Capítulo 2 concluído. Uma nova trilha se abre além dos campos."
             aurino -> "Capítulo 2: atravesse a passagem azul e explore os Campos Vermelhos."
             eggFound -> "O ovo misterioso está com você. Continue cuidando dele."
@@ -307,10 +371,24 @@ class GameRenderer : GLSurfaceView.Renderer {
         beacon(-4f, -108f, .18f, .55f, .82f)
         npc(4f, -78f, .58f, .38f, .20f)
 
-        if (lumeaMet || chapter2Stage >= 3) lumea()
+        if ((lumeaMet || chapter2Stage >= 3) && !lumeaBonded) lumea()
 
         box(-10f, 2.8f, -114f, 7f, 2.8f, 1.6f, .10f, .16f, .18f)
         box(8f, 3.6f, -116f, 8f, 3.6f, 1.8f, .08f, .13f, .16f)
+
+        // Capítulo 3: Vale das Águas, pontos de coleta e santuário.
+        box(0f, -.12f, -141f, 22f, .12f, 42f, .12f, .28f, .34f)
+        box(0f, .02f, -130f, 2.8f, .04f, 9f, .10f, .46f, .58f)
+        box(-10f, .35f, -136f, .34f, .35f, .34f, .20f, .72f, .92f)
+        box(9f, .35f, -142f, .34f, .35f, .34f, .20f, .72f, .92f)
+        box(-6f, .35f, -150f, .34f, .35f, .34f, .20f, .72f, .92f)
+        beacon(0f, -130f, .18f, .55f, .82f)
+        beacon(-10f, -136f, .18f, .72f, .92f)
+        beacon(9f, -142f, .18f, .72f, .92f)
+        beacon(-6f, -150f, .18f, .72f, .92f)
+        beacon(4f, -154f, .60f, .34f, .82f)
+        box(4f, .65f, -154f, 1.4f, .65f, 1.4f, .16f, .22f, .32f)
+        box(4f, 1.55f, -154f, .25f, .9f, .25f, .20f, .62f, .82f)
     }
 
 
