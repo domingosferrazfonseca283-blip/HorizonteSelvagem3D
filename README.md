@@ -1,6 +1,6 @@
 # Horizonte Selvagem 3D
 
-Protótipo jogável de aventura/exploração 3D com personagens humanoides originais, fauna original, exploração em primeira pessoa e encontros com decisões de combate/vínculo.
+Protótipo jogável de aventura/exploração 3D com personagens humanoides e criaturas originais. O foco é ligação, compromisso, lealdade, aventura, exploração e história — não apenas batalhas.
 
 ## Visão
 
@@ -12,8 +12,9 @@ A direção busca **aventura anime cinematográfica + exploração 3D madura**, 
 - Personagem humanoide original e criaturas originais.
 - Controles WASD, corrida, salto e câmera com mouse.
 - Sistema de missão, XP, nível e energia.
-- Encontros com três ações: Pulso, Guardar e Vínculo.
+- Encontros com Pulso, Cuidar e Vínculo, colocando confiança acima da força.
 - Fauna com vida, movimento e estados.
+- Primeira etapa da história centrada em uma região rural, Mística e um ovo misterioso.
 - HUD responsivo.
 - Protótipo Android nativo em `android/`, com build automático via GitHub Actions.
 - Cada build do Android no branch `master` também é publicada como GitHub Release pública com o APK.
@@ -48,9 +49,9 @@ O jogo web é publicado automaticamente pelo GitHub Actions em cada alteração 
 - **Mouse** — olhar
 - **ESPAÇO** — saltar
 - **E** — interagir com criaturas próximas
-- **F** — iniciar encontro
+- **F** — iniciar encontro com uma criatura
 - **PULSO** — reduzir a vida da criatura
 - **GUARDAR** — recuperar energia
-- **VÍNCULO** — estabelecer vínculo quando a criatura estiver enfraquecida
+- **VÍNCULO** — fortalecer uma relação baseada em confiança
 
 > Na primeira publicação, pode ser necessário ativar **Settings → Pages** e selecionar **GitHub Actions** como fonte de publicação.
